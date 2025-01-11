@@ -21,4 +21,12 @@ public class MemberDto {
         @Size(message = "닉네임은 20자 이하로 적어주세요", max=20)
         String nickname;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class JoinResponseDto{
+        boolean status;
+    }
 }

@@ -19,7 +19,7 @@ public class MemberRestController {
 
     // 닉네임 중복 체크
     @GetMapping("/check/{nickname}")
-    public ResponseEntity<ApiResponse<String>> checkNickname(@PathVariable
+    public ResponseEntity<ApiResponse<MemberDto.JoinResponseDto>> checkNickname(@PathVariable
                                                              @NotNull @NotBlank
                                                              @Size(max=20) String nickname) {
         return memberService.checkNickname(nickname);
@@ -27,7 +27,7 @@ public class MemberRestController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<String>> signUp(@RequestParam
+    public ResponseEntity<ApiResponse<MemberDto.JoinResponseDto>> signUp(@RequestParam
                                                       @NotNull @NotBlank
                                                       @Size(max=20)String nickname) {
         return memberService.signUp(nickname);
