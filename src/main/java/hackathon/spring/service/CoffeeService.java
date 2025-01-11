@@ -2,6 +2,7 @@ package hackathon.spring.service;
 
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
@@ -134,8 +135,23 @@ public class CoffeeService {
     }
 
 
-    public List<Coffee> searchByKeyword(String keyword) {
-        return coffeeRepository.findByBrandOrNameContaining(keyword);
+    public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(String keyword) {
+        List<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword);
+        CoffeeDto coffeeDto = CoffeeDto.builder().coffees(coffees).build();
+
+        if (coffees == null || coffees.isEmpty()) {
+
+            CoffeeDto Dto = CoffeeDto.builder().coffees(null).build();
+
+            return ResponseEntity
+                    .status(SuccessStatus._OK.getHttpStatus())
+                    .body(ApiResponse.onFailure(
+                            ErrorStatus._COFFEE_NOT_FOUND.getCode(),
+                            ErrorStatus._COFFEE_NOT_FOUND.getMessage(),
+                            Dto));
+        }
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
     }
 
 }

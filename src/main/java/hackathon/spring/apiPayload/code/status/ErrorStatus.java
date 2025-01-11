@@ -27,7 +27,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //시간 관련 응답
     _EMPTY_TIME_INPUT(HttpStatus.BAD_REQUEST, "TIME400", "시간을 입력해야 합니다."),
-    _INVALID_TIME_FORMAT(HttpStatus.BAD_REQUEST, "TIME401", "24시 형태로 입력해주세요.");
+    _INVALID_TIME_FORMAT(HttpStatus.BAD_REQUEST, "TIME401", "24시 형태로 입력해주세요."),
+
+    //커피 관련 응답
+    _COFFEE_NOT_FOUND(HttpStatus.NOT_FOUND, "COFFEE404", "존재하지 않는 커피입니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
