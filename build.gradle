@@ -35,7 +35,8 @@ dependencies {
 	//jwt
 	implementation 'com.auth0:java-jwt:4.4.0'
 	//swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+	implementation 'io.swagger.core.v3:swagger-core-jakarta:2.2.27'
 	//AWS S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	//validation

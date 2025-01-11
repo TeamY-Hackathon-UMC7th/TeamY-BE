@@ -14,6 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
@@ -47,7 +53,29 @@ public class CoffeeService {
         return coffeeRepository.save(newCoffee);
     }
 
+    public List<Coffee> recommendByCaffeineLimit(LocalDateTime userTimeInput) {
+        long t = ChronoUnit.MINUTES.between(LocalDateTime.now(), userTimeInput);
 
+        int minCaffeine = 0;
+        int maxCaffeine = 0;
 
+        if (t >= 480) {
+            maxCaffeine = Integer.MAX_VALUE;
+        } else if (t >= 390) {
+            maxCaffeine = 150;
+        } else if (t >= 300) {
+            maxCaffeine = 120;
+        } else if (t >= 240) {
+            maxCaffeine = 100;
+        } else {
+            maxCaffeine = 0;
+        }
+
+        List<Coffee> coffeeList = coffeeRepository.findByCaffeineBetweenOrderByCaffeineAsc(minCaffeine, maxCaffeine);
+        Collections.shuffle(coffeeList);  // 리스트를 무작위로 섞기
+        return coffeeList.stream()
+                .limit(5)         // 상위 5개만 반환
+                .collect(Collectors.toList());
+    }
 
 }
