@@ -86,8 +86,9 @@ public class ReviewService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
 
         if (!review.getMember().getNickname().equals(nickname)) {
+            System.out.println("자신이 쓴 리뷰인지 확인하는 과정입니다. ");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.onFailure("401", "You can only delete your own reviews.", null));
+                    .body(ApiResponse.onFailure("401", "자신이 쓴 리뷰가 아니므로 지울 수 없습니다", null));
         }
 
         reviewRepository.delete(review);
@@ -95,12 +96,9 @@ public class ReviewService {
     }
 
     @Transactional
-    public List<Review> getAllReviews(){
-        List<Review> reviews = reviewRepository.findAll();
-        if (reviews.isEmpty()) {
-            System.out.println("No reviews found");
-            return Collections.emptyList(); // 빈 리스트 반환
-        }
+    public Optional<Review> getAllReviews(Long memberId){
+        //자신이 쓴 리뷰만 모두 가져와야 함
+        Optional<Review> reviews = reviewRepository.findByMemberId(memberId);
         return reviews;
     }
 
