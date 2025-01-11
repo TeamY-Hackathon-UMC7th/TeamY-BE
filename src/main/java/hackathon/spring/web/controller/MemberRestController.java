@@ -1,16 +1,11 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
-import hackathon.spring.apiPayload.code.status.ErrorStatus;
-import hackathon.spring.domain.common.Member;
-import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.MemberService;
 import hackathon.spring.web.dto.MemberDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor

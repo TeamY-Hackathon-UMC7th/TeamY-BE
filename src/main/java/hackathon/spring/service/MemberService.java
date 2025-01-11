@@ -4,7 +4,6 @@ package hackathon.spring.service;
 import hackathon.spring.JwtTokenProvider;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
-import hackathon.spring.domain.common.Member;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.web.dto.MemberDto;
 import lombok.RequiredArgsConstructor;
