@@ -34,6 +34,15 @@ public class MemberService {
     }
 
     public ResponseEntity<ApiResponse<String>> signUp(MemberDto.JoinResultDto memberDto) {
+        if (memberDto == null || memberDto.getNickname() == null || memberDto.getNickname().trim().isEmpty()) {
+            return ResponseEntity
+                    .status(ErrorStatus._EMPTY_NICKNAME.getHttpStatus())
+                    .body(ApiResponse.onFailure(
+                            ErrorStatus._EMPTY_NICKNAME.getCode(),
+                            ErrorStatus._EMPTY_NICKNAME.getMessage(),
+                            null));
+        }
+
         if (memberRepository.existsByNickname(memberDto.getNickname())) {
             return ResponseEntity
                     .status(ErrorStatus._BAD_REQUEST.getHttpStatus())
@@ -53,6 +62,15 @@ public class MemberService {
     }
 
     public ResponseEntity<ApiResponse<String>> login(MemberDto.JoinResultDto memberDto) {
+        if (memberDto == null || memberDto.getNickname() == null || memberDto.getNickname().trim().isEmpty()) {
+            return ResponseEntity
+                    .status(ErrorStatus._EMPTY_NICKNAME.getHttpStatus())
+                    .body(ApiResponse.onFailure(
+                            ErrorStatus._EMPTY_NICKNAME.getCode(),
+                            ErrorStatus._EMPTY_NICKNAME.getMessage(),
+                            null));
+        }
+
         Optional<Member> member = memberRepository.findByNickname(memberDto.getNickname());
 
         if (member.isPresent()) {

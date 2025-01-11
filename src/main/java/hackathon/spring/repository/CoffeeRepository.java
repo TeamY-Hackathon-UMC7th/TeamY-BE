@@ -18,4 +18,5 @@ public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
             "CAST(c.brand AS string) LIKE CONCAT('%', :keyword, '%')")
     List<Coffee> findByBrandOrNameContaining(@Param("keyword") String keyword);
 
+
 }
