@@ -7,12 +7,14 @@ import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.ReviewService;
 import hackathon.spring.web.dto.ReviewDto;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +36,7 @@ public class ReviewRestController {
     )
     public ResponseEntity<ApiResponse<String>> createReview(
             @RequestHeader("Authorization") String token,
-            @RequestBody ReviewDto reviewRequestDTO) {
+            @RequestBody @Valid ReviewDto reviewRequestDTO) {
 
         try {
             String nickname = reviewService.extractNicknameFromToken(token);
@@ -63,15 +65,14 @@ public class ReviewRestController {
     @Operation(
             summary = "로그인한 사용자의 모든 리뷰 가져오기 API입니다."
     )
-    public ResponseEntity<ApiResponse<Optional<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
+    public ResponseEntity<ApiResponse<List<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
         String nickname = reviewService.extractNicknameFromToken(token);
         Optional<Member> member = memberRepository.findByNickname(nickname);
-        Optional<Review> allReviews = reviewService.getAllReviews(member.get().getId());
+        List<Review> allReviews = reviewService.getAllReviews(member.get().getId());
 
+        // 리뷰가 없는 경우
         if (allReviews.isEmpty()) {
-            return ResponseEntity.ok(
-                    ApiResponse.onSuccess( Optional.empty(), "No reviews found for the given member.")
-            );
+            return ResponseEntity.ok(ApiResponse.onSuccess(Collections.emptyList(), "No reviews found for the given member."));
         }
         return ResponseEntity.ok(ApiResponse.onSuccess(allReviews));
     }

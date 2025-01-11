@@ -96,9 +96,9 @@ public class ReviewService {
     }
 
     @Transactional
-    public Optional<Review> getAllReviews(Long memberId){
+    public List<Review> getAllReviews(Long memberId){
         //자신이 쓴 리뷰만 모두 가져와야 함
-        Optional<Review> reviews = reviewRepository.findByMemberId(memberId);
+        List<Review> reviews = reviewRepository.findByMemberId(memberId);
         return reviews;
     }
 

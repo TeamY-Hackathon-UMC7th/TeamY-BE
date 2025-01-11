@@ -1,6 +1,8 @@
 package hackathon.spring.web.dto;
 
 import hackathon.spring.domain.Coffee;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,8 +15,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewDto {
-    private Long coffeeKey;              // 음료 키
-    private LocalDateTime drinkTime;     // 음용 시간
-    private LocalDateTime sleepTime;     // 수면 시간
-    private String comment;              // 코멘트 (200자 제한)
+    @NotNull(message = "coffeeKey는 필수 입력값입니다.")
+    private Long coffeeKey;
+
+    @Size(max = 200, message = "comment는 최대 200자까지 가능합니다.")
+    private String comment;
+
+    @NotNull(message = "drinkTime은 필수입니다.")
+    private LocalDateTime drinkTime;
+
+    @NotNull(message = "sleepTime은 필수입니다.")
+    private LocalDateTime sleepTime;
 }
