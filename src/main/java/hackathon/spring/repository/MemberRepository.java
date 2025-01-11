@@ -1,6 +1,7 @@
 package hackathon.spring.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import hackathon.spring.domain.Member;
 
 import java.util.Optional;
 

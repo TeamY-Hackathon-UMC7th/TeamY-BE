@@ -6,14 +6,17 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.web.dto.MemberDto;
+import hackathon.spring.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = false)
 public class MemberService {
     private final MemberRepository memberRepository;
 
