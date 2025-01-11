@@ -1,5 +1,7 @@
 package hackathon.spring.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import hackathon.spring.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Setter
 @Getter
 @Builder
@@ -21,6 +24,7 @@ public class Review extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY) // Member와 연관관계 설정
     @JoinColumn(name = "member_id", nullable = false) // Foreign Key
+    @JsonManagedReference
     private Member member; // 닉네임 (NOT NULL)
 
     @ManyToOne(fetch = FetchType.LAZY) // Coffee와 연관관계 설정

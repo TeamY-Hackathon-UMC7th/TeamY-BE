@@ -23,7 +23,7 @@ public class ReviewRestController {
     private final ReviewService reviewService;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/")
+    @PostMapping("")
     @Operation(
             summary = "리뷰 작성 API",
             description = """
@@ -57,7 +57,7 @@ public class ReviewRestController {
         return reviewService.deleteReview(reviewId, nickname);
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     @Operation(
             summary = "모든 리뷰 가져오기 API"
     )

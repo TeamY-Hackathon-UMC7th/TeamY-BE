@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,6 +97,10 @@ public class ReviewService {
     @Transactional
     public List<Review> getAllReviews(){
         List<Review> reviews = reviewRepository.findAll();
+        if (reviews.isEmpty()) {
+            System.out.println("No reviews found");
+            return Collections.emptyList(); // 빈 리스트 반환
+        }
         return reviews;
     }
 

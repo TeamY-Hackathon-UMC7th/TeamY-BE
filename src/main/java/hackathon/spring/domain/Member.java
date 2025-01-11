@@ -1,5 +1,6 @@
 package hackathon.spring.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,4 +22,6 @@ public class Member {
 
     @Column(nullable = false, unique = true)
     private String nickname;
+
+
 }
