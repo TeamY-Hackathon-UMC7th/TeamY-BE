@@ -5,6 +5,8 @@ import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.Review;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.service.CoffeeService;
+import hackathon.spring.web.dto.CoffeeDto;
+import hackathon.spring.web.dto.MemberDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -45,7 +47,7 @@ public class CoffeeRestController {
 //    }
 
 
-    @PostMapping("/recommend")
+    @GetMapping("/recommend")
     @Operation(
             summary = "카페인 농도에 따라 음료 추천 API",
             description = """
@@ -53,9 +55,8 @@ public class CoffeeRestController {
                 - 요청 본문에는 userTimeInput, 즉 사용자가 자고싶은 시간이 포함되어야 합니다.
                 """
     )
-    public ResponseEntity<List<Coffee>> recommendCoffees(@RequestBody TimeRequestDto timeRequestDto) {
-        List<Coffee> recommendedCoffees = coffeeService.recommendByCaffeineLimit(timeRequestDto.getUserTimeInput());
-        return ResponseEntity.ok(recommendedCoffees);
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendCoffees(@RequestParam("time") String time) {
+        return coffeeService.recommendByCaffeineLimit(time);
     }
 
     @GetMapping("/popular")
@@ -65,7 +66,7 @@ public class CoffeeRestController {
               랜덤으로 인기 있는 음료 5개를 추천해주는 API입니다.
                 """
     )
-    public List<Coffee> getPopularCoffees() {
+    public ResponseEntity<ApiResponse<CoffeeDto>> getPopularCoffees() {
         return coffeeService.recommendPopularCoffees();
     }
 
