@@ -1,10 +1,17 @@
 package hackathon.spring.service;
 
 import hackathon.spring.domain.Coffee;
+import hackathon.spring.domain.enums.Brand;
+import hackathon.spring.domain.uuid.Uuid;
+import hackathon.spring.domain.uuid.UuidRepository;
 import hackathon.spring.repository.CoffeeRepository;
+import hackathon.spring.s3.AmazonS3Manager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -18,10 +25,32 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = false)
 public class CoffeeService {
     private final CoffeeRepository coffeeRepository;
-  
-    public Coffee addCoffee(Coffee coffee) {
+    private final AmazonS3Manager s3Manager;
+    private final UuidRepository uuidRepository;
+
+    public Coffee addCoffee(String name, Brand brand,Integer sugar, Integer caffeine, Integer calories, Integer protein, MultipartFile coffeeImg) {
+        // UUID 생성 및 저장
+        String uuid = UUID.randomUUID().toString();
+        Uuid savedUuid = uuidRepository.save(Uuid.builder()
+                .uuid(uuid).build());
+
+        // 이미지 업로드
+        String imageKey = s3Manager.generateKeyName(savedUuid); // 커피 이미지에 적합한 KeyName 생성
+        String imageUrl = s3Manager.uploadFile(imageKey, coffeeImg);
+
+        // Coffee 객체 생성
+        Coffee newCoffee = Coffee.builder()
+                .name(name)
+                .brand(brand)
+                .sugar(sugar)
+                .caffeine(caffeine)
+                .calories(calories)
+                .protein(protein)
+                .coffeeImgUrl(imageUrl) // 이미지 URL 설정
+                .build();
+
         // Coffee 객체 저장
-        return coffeeRepository.save(coffee);
+        return coffeeRepository.save(newCoffee);
     }
 
     public List<Coffee> recommendByCaffeineLimit(LocalDateTime userTimeInput) {
@@ -60,5 +89,9 @@ public class CoffeeService {
                 .collect(Collectors.toList());
     }
 
+
+    public List<Coffee> searchByKeyword(String keyword) {
+        return coffeeRepository.findByBrandOrNameContaining(keyword);
+    }
 
 }
