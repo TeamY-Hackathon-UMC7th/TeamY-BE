@@ -12,6 +12,7 @@ public class MemberDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class JoinResultDto {
+
         String nickname;
     }
 }
