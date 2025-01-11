@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+import static java.lang.System.out;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,8 +29,12 @@ public class AmazonS3Manager{
     public String uploadFile(String keyName, MultipartFile file){
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
+        metadata.setContentType(file.getContentType()); // Content-Type 설정
+        metadata.setContentDisposition("inline");       // Content-Disposition 설정
+
         try {
             amazonS3.putObject(new PutObjectRequest(amazonConfig.getBucket(), keyName, file.getInputStream(), metadata));
+
         } catch (IOException e){
             log.error("error at AmazonS3Manager uploadFile : {}", (Object) e.getStackTrace());
         }
