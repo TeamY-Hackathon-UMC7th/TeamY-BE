@@ -36,6 +36,11 @@ public class CoffeeRestController {
         return ResponseEntity.ok(recommendedCoffees);
     }
 
+    @GetMapping("/popular") // 인기메뉴 추천
+    public List<Coffee> getPopularCoffees() {
+        return coffeeService.recommendPopularCoffees();
+    }
+
 
 
 

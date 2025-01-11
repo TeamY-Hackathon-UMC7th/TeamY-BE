@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,5 +48,17 @@ public class CoffeeService {
                 .limit(5)         // 상위 5개만 반환
                 .collect(Collectors.toList());
     }
+
+    public List<Coffee> recommendPopularCoffees(){
+        List<Coffee> allCoffees = coffeeRepository.findAll();
+        if (allCoffees.isEmpty()) {
+            throw new NoSuchElementException("커피 데이터가 존재하지 않습니다.");
+        }
+        Collections.shuffle(allCoffees);
+        return allCoffees.stream()
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
 
 }
