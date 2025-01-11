@@ -23,8 +23,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
 
     //리뷰 관련 응답
-    _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다.");
+    _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다."),
 
+    //시간 관련 응답
+    _EMPTY_TIME_INPUT(HttpStatus.BAD_REQUEST, "TIME400", "시간을 입력해야 합니다."),
+    _INVALID_TIME_FORMAT(HttpStatus.BAD_REQUEST, "TIME401", "24시 형태로 입력해주세요.");
 
     private final HttpStatus httpStatus;
     private final String code;
