@@ -19,7 +19,7 @@ jobs:
 
       - name: Make application.yml  # application.yml 파일 생성
         run: |
-          cd spring/src/main/resources
+          cd src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
         shell: bash
 
