@@ -62,6 +62,7 @@ public class MemberService {
         memberRepository.save(member);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
+
     }
 
     public ResponseEntity<ApiResponse<MemberDto.LoginResponseDto>> login(String nickname) {
