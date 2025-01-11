@@ -28,12 +28,12 @@ public class Coffee {
     private Integer sugar; //
 
     @Column(nullable = false)
-    private Integer caffeine; //
+    private Integer caffeine;
 
-    private Integer calories; //
+    private Integer calories;
 
-    private Integer protein; //
+    private Integer protein;
 
-    private String coffeeImgUrl; // 커피 이미지 URL (NULL 허용)
+    private String coffeeImgUrl;
 
 }
