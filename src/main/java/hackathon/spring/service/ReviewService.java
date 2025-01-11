@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -90,6 +91,12 @@ public class ReviewService {
 
         reviewRepository.delete(review);
         return ResponseEntity.ok(ApiResponse.onSuccess("Review deleted successfully!"));
+    }
+
+    @Transactional
+    public List<Review> getAllReviews(){
+        List<Review> reviews = reviewRepository.findAll();
+        return reviews;
     }
 
 }

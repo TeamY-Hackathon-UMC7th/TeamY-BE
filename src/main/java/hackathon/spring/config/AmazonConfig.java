@@ -31,7 +31,6 @@ public class AmazonConfig {
     private String bucket;
 
 
-
     @PostConstruct
     public void init() {
         this.awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
