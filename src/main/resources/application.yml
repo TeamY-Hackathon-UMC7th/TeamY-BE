@@ -17,3 +17,15 @@ spring:
         hbm2ddl:
           auto: update
         default_batch_fetch_size: 1000
+
+cloud:
+  aws:
+    s3:
+      bucket: umc-7th-hackathon
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
