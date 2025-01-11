@@ -17,7 +17,7 @@ public class Review extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reviewKey; // Review_Key -> Primary Key
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY) // Member와 연관관계 설정
     @JoinColumn(name = "nickname", nullable = false) // Foreign Key

@@ -14,9 +14,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional(readOnly = false)
 public class CoffeeService {
     private final CoffeeRepository coffeeRepository;
+  
+    public Coffee addCoffee(Coffee coffee) {
+        // Coffee 객체 저장
+        return coffeeRepository.save(coffee);
+    }
 
     public List<Coffee> recommendByCaffeineLimit(LocalDateTime userTimeInput) {
         long t = ChronoUnit.MINUTES.between(LocalDateTime.now(), userTimeInput);
@@ -42,4 +47,5 @@ public class CoffeeService {
                 .limit(5)         // 상위 5개만 반환
                 .collect(Collectors.toList());
     }
+
 }
