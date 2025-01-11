@@ -12,5 +12,5 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TimeRequestDto {
-    private LocalDateTime userTimeInput;
+    private String userTimeInput;
 }

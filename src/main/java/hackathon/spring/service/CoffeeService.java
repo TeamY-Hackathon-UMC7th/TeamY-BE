@@ -53,8 +53,11 @@ public class CoffeeService {
         return coffeeRepository.save(newCoffee);
     }
 
-    public List<Coffee> recommendByCaffeineLimit(LocalDateTime userTimeInput) {
-        long t = ChronoUnit.MINUTES.between(LocalDateTime.now(), userTimeInput);
+    public List<Coffee> recommendByCaffeineLimit(String userTimeInput) {
+        int userHourInput = Integer.parseInt(userTimeInput);
+        int currentHour = LocalDateTime.now().getHour();
+
+        long t = (userHourInput - currentHour + 24) % 24 * 60;
 
         int minCaffeine = 0;
         int maxCaffeine = 0;
