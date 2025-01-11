@@ -1,5 +1,7 @@
 package hackathon.spring.service;
 
+import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.domain.uuid.Uuid;
@@ -54,10 +56,27 @@ public class CoffeeService {
     }
 
     public List<Coffee> recommendByCaffeineLimit(String userTimeInput) {
-        int userHourInput = Integer.parseInt(userTimeInput);
+        if (userTimeInput == null || userTimeInput.trim().isEmpty()) {
+            throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
+        }
+
+        int userHourInput;
+        try {
+            userHourInput = Integer.parseInt(userTimeInput);
+            if (userHourInput < 0 || userHourInput > 23){
+                throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+            }
+        } catch (NumberFormatException e) {
+            throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+        }
         int currentHour = LocalDateTime.now().getHour();
 
-        long t = (userHourInput - currentHour + 24) % 24 * 60;
+        long t;
+        if (userHourInput <= currentHour) {
+            t = ((userHourInput + 24) - currentHour) * 60; // 하루를 더해서 계산
+        } else {
+            t = (userHourInput - currentHour) * 60; // 같은 날 시간 계산
+        }
 
         int minCaffeine = 0;
         int maxCaffeine = 0;
