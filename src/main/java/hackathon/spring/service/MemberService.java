@@ -4,6 +4,7 @@ package hackathon.spring.service;
 import hackathon.spring.JwtTokenProvider;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.web.dto.MemberDto;
 import hackathon.spring.domain.Member;
@@ -21,19 +22,28 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
 
-    public ResponseEntity<ApiResponse<String>> checkNickname(String nickname) {
+    public ResponseEntity<ApiResponse<MemberDto.JoinResponseDto>> checkNickname(String nickname) {
         if (memberRepository.existsByNickname(nickname)) {
+
+            MemberDto.JoinResponseDto joinResponseDto = MemberDto.JoinResponseDto.builder()
+                    .status(false)
+                    .build();
+
             return ResponseEntity
-                    .status(ErrorStatus._DUPLICATE_NICKNAME.getHttpStatus())
+                    .status(SuccessStatus._OK.getHttpStatus())
                     .body(ApiResponse.onFailure(
-                            ErrorStatus._DUPLICATE_NICKNAME.getCode(),
-                            ErrorStatus._DUPLICATE_NICKNAME.getMessage(),
-                            null));
+                            ErrorStatus._BAD_REQUEST.getCode(),
+                            ErrorStatus._BAD_REQUEST.getMessage(),
+                            joinResponseDto));
         }
-        return ResponseEntity.ok(ApiResponse.onSuccess("사용 가능한 닉네임입니다."));
+
+        MemberDto.JoinResponseDto joinResponseDto = MemberDto.JoinResponseDto.builder()
+                .status(true)
+                .build();
+        return ResponseEntity.ok(ApiResponse.onSuccess(joinResponseDto));
     }
 
-    public ResponseEntity<ApiResponse<String>> signUp(String nickname) {
+    public ResponseEntity<ApiResponse<MemberDto.JoinResponseDto>> signUp(String nickname) {
         if (nickname == null || nickname.trim().isEmpty()) {
             ResponseEntity.status(ErrorStatus._BAD_REQUEST.getHttpStatus()).body("닉네임은 빈 값일 수 없습니다.");
         }
@@ -51,8 +61,11 @@ public class MemberService {
                 .build();
         memberRepository.save(member);
 
-        String token = JwtTokenProvider.generateToken(nickname);
-        return ResponseEntity.ok(ApiResponse.onSuccess(token));
+        MemberDto.JoinResponseDto joinResponseDto = MemberDto.JoinResponseDto.builder()
+                .status(true)
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(joinResponseDto));
     }
 
     public ResponseEntity<ApiResponse<String>> login(String nickname) {
