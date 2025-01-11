@@ -1,12 +1,17 @@
 package hackathon.spring.service;
 
+import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.domain.uuid.Uuid;
 import hackathon.spring.domain.uuid.UuidRepository;
 import hackathon.spring.repository.CoffeeRepository;
 import hackathon.spring.s3.AmazonS3Manager;
+import hackathon.spring.web.dto.CoffeeDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,8 +58,29 @@ public class CoffeeService {
         return coffeeRepository.save(newCoffee);
     }
 
-    public List<Coffee> recommendByCaffeineLimit(LocalDateTime userTimeInput) {
-        long t = ChronoUnit.MINUTES.between(LocalDateTime.now(), userTimeInput);
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendByCaffeineLimit(String userTimeInput) {
+        if (userTimeInput == null || userTimeInput.trim().isEmpty()) {
+            throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
+        }
+
+        int userHourInput;
+        try {
+            userHourInput = Integer.parseInt(userTimeInput);
+            if (userHourInput < 0 || userHourInput > 23) {
+                throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+            }
+        } catch (NumberFormatException e) {
+            throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+        }
+
+        int currentHour = LocalDateTime.now().getHour();
+
+        long t;
+        if (userHourInput <= currentHour) {
+            t = ((userHourInput + 24) - currentHour) * 60; // 하루를 더해서 계산
+        } else {
+            t = (userHourInput - currentHour) * 60; // 같은 날 시간 계산
+        }
 
         int minCaffeine = 0;
         int maxCaffeine = 0;
@@ -73,20 +99,38 @@ public class CoffeeService {
 
         List<Coffee> coffeeList = coffeeRepository.findByCaffeineBetweenOrderByCaffeineAsc(minCaffeine, maxCaffeine);
         Collections.shuffle(coffeeList);  // 리스트를 무작위로 섞기
-        return coffeeList.stream()
-                .limit(5)         // 상위 5개만 반환
+
+        // 상위 5개의 커피를 추천
+        List<Coffee> recommendedCoffees = coffeeList.stream()
+                .limit(5)
                 .collect(Collectors.toList());
+
+        // CoffeeDto로 감싸기
+        CoffeeDto coffeeDto = new CoffeeDto(recommendedCoffees);
+
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
     }
 
-    public List<Coffee> recommendPopularCoffees(){
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendPopularCoffees(){
         List<Coffee> allCoffees = coffeeRepository.findAll();
         if (allCoffees.isEmpty()) {
             throw new NoSuchElementException("커피 데이터가 존재하지 않습니다.");
         }
+
+        // 커피 리스트를 랜덤으로 섞기
         Collections.shuffle(allCoffees);
-        return allCoffees.stream()
+
+        // 상위 5개의 커피를 추천
+        List<Coffee> recommendedCoffees = allCoffees.stream()
                 .limit(5)
                 .collect(Collectors.toList());
+
+        // CoffeeDto로 감싸기
+        CoffeeDto coffeeDto = new CoffeeDto(recommendedCoffees);
+
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
     }
 
 
