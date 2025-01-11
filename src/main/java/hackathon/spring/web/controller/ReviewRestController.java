@@ -33,4 +33,14 @@ public class ReviewRestController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<ApiResponse<String>> deleteReview(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long reviewId) {
+
+        String nickname = reviewService.extractNicknameFromToken(token);
+        return reviewService.deleteReview(reviewId, nickname);
+    }
+
 }
