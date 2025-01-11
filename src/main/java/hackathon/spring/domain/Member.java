@@ -12,6 +12,6 @@ import lombok.*;
 public class Member {
 
     @Id
-    @Column(nullable = false, unique = true) // 닉네임은 UNIQUE
+    @Column(nullable = false, unique = true,columnDefinition = "VARCHAR(20)")
     private String nickname;
 }
