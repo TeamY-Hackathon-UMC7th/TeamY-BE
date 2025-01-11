@@ -18,7 +18,11 @@ public enum ErrorStatus implements BaseErrorCode {
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     //멤버 관련 응답
-    _DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "COMMON409", "이미 사용 중인 닉네임입니다.");
+    _DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER409", "이미 사용 중인 닉네임입니다."),
+
+
+    //리뷰 관련 응답
+    _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다.");
 
 
     private final HttpStatus httpStatus;

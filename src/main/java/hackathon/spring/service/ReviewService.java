@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.Member;
 import hackathon.spring.domain.Review;
@@ -80,7 +81,7 @@ public class ReviewService {
     @Transactional
     public ResponseEntity<ApiResponse<String>> deleteReview(Long reviewId, String nickname) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+                .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
 
         if (!review.getMember().getNickname().equals(nickname)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
