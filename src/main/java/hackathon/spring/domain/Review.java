@@ -20,7 +20,7 @@ public class Review extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY) // Member와 연관관계 설정
-    @JoinColumn(name = "nickname", nullable = false) // Foreign Key
+    @JoinColumn(name = "member_id", nullable = false) // Foreign Key
     private Member member; // 닉네임 (NOT NULL)
 
     @ManyToOne(fetch = FetchType.LAZY) // Coffee와 연관관계 설정

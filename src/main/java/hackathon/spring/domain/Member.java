@@ -11,7 +11,14 @@ import lombok.*;
 @AllArgsConstructor
 public class Member {
 
+//    @Id
+//    @Column(nullable = false, unique = true,columnDefinition = "VARCHAR(20)")
+//    private String nickname;
+
     @Id
-    @Column(nullable = false, unique = true,columnDefinition = "VARCHAR(20)")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
     private String nickname;
 }

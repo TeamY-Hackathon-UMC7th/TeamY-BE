@@ -2,6 +2,7 @@ package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Coffee;
+import hackathon.spring.domain.Review;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.service.CoffeeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,6 +80,8 @@ public class CoffeeRestController {
         List<Coffee> coffees = coffeeService.searchByKeyword(keyword);
         return ResponseEntity.ok(coffees);
     }
+
+
 
 
 

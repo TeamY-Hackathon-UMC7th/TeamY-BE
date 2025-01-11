@@ -2,6 +2,7 @@ package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Member;
+import hackathon.spring.domain.Review;
 import hackathon.spring.service.ReviewService;
 import hackathon.spring.web.dto.ReviewDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,15 +13,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/reviews")
+@RequestMapping("/review")
 public class ReviewRestController {
 
     private final ReviewService reviewService;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping
+    @PostMapping("/")
     @Operation(
             summary = "리뷰 작성 API",
             description = """
@@ -52,6 +55,15 @@ public class ReviewRestController {
 
         String nickname = reviewService.extractNicknameFromToken(token);
         return reviewService.deleteReview(reviewId, nickname);
+    }
+
+    @GetMapping("/")
+    @Operation(
+            summary = "모든 리뷰 가져오기 API"
+    )
+    public ResponseEntity<ApiResponse<List<Review>>> getAllReviews(){
+        List<Review> allReviews = reviewService.getAllReviews();
+        return ResponseEntity.ok(ApiResponse.onSuccess(allReviews));
     }
 
 }
