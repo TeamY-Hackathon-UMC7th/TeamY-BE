@@ -32,8 +32,8 @@ public class MemberService {
             return ResponseEntity
                     .status(SuccessStatus._OK.getHttpStatus())
                     .body(ApiResponse.onFailure(
-                            ErrorStatus._BAD_REQUEST.getCode(),
-                            ErrorStatus._BAD_REQUEST.getMessage(),
+                            ErrorStatus._DUPLICATE_NICKNAME.getCode(),
+                            ErrorStatus._DUPLICATE_NICKNAME.getMessage(),
                             joinResponseDto));
         }
 
