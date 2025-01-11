@@ -76,4 +76,18 @@ public class ReviewService {
                             null));
         }
     }
+
+    @Transactional
+    public ResponseEntity<ApiResponse<String>> deleteReview(Long reviewId, String nickname) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        if (!review.getMember().getNickname().equals(nickname)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.onFailure("401", "You can only delete your own reviews.", null));
+        }
+
+        reviewRepository.delete(review);
+        return ResponseEntity.ok(ApiResponse.onSuccess("Review deleted successfully!"));
+    }
 }
