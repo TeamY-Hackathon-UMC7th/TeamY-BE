@@ -6,6 +6,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.apiPayload.exception.GeneralException;
+import hackathon.spring.apiPayload.exception.Handler.ReviewHandler;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.Member;
 import hackathon.spring.domain.Review;
@@ -19,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,6 +99,9 @@ public class ReviewService {
     public List<Review> getAllReviews(Long memberId){
         //자신이 쓴 리뷰만 모두 가져와야 함
         List<Review> reviews = reviewRepository.findByMemberId(memberId);
+        if(reviews.isEmpty()) {
+            throw new ReviewHandler(ErrorStatus._REVIEW_NOT_FOUND);
+        }
         return reviews;
     }
 

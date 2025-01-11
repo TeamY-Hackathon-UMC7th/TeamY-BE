@@ -1,6 +1,7 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.apiPayload.exception.Handler.ReviewHandler;
 import hackathon.spring.domain.Member;
 import hackathon.spring.domain.Review;
 import hackathon.spring.repository.MemberRepository;
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,10 +70,6 @@ public class ReviewRestController {
         Optional<Member> member = memberRepository.findByNickname(nickname);
         List<Review> allReviews = reviewService.getAllReviews(member.get().getId());
 
-        // 리뷰가 없는 경우
-        if (allReviews.isEmpty()) {
-            return ResponseEntity.ok(ApiResponse.onSuccess(Collections.emptyList(), "No reviews found for the given member."));
-        }
         return ResponseEntity.ok(ApiResponse.onSuccess(allReviews));
     }
 
