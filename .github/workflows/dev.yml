@@ -24,7 +24,7 @@ jobs:
         shell: bash
 
       - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
-        run: chmod +x ./spring/gradlew
+        run: chmod +x ./gradlew
 
       - name: init with Gradle
         uses: gradle/gradle-build-action@v2
@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: umc7thServer
-          path: ./spring/build/libs/*.jar
+          path: ./build/libs/*.jar
 
   deploy:
     needs: build  # build 작업이 성공적으로 완료된 후 실행
@@ -53,7 +53,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: umc7thServer
-          path: ./spring/build/libs/
+          path: ./build/libs/
 
       - name: Deploy to EC2  # EC2에 배포
         env:
@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
-          jar_file=$(find ./spring/build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          jar_file=$(find ./build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15  # 기존에 실행 중인 Java 프로세스 종료
