@@ -49,6 +49,12 @@ public class CoffeeRestController {
         return ResponseEntity.ok(recommendedCoffees);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Coffee>> searchByKeyword(@RequestParam("keyword") String keyword) {
+        List<Coffee> coffees = coffeeService.searchByKeyword(keyword);
+        return ResponseEntity.ok(coffees);
+    }
+
 
 
 

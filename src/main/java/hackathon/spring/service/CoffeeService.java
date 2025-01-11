@@ -6,7 +6,6 @@ import hackathon.spring.domain.uuid.Uuid;
 import hackathon.spring.domain.uuid.UuidRepository;
 import hackathon.spring.repository.CoffeeRepository;
 import hackathon.spring.s3.AmazonS3Manager;
-import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +75,10 @@ public class CoffeeService {
         return coffeeList.stream()
                 .limit(5)         // 상위 5개만 반환
                 .collect(Collectors.toList());
+    }
+
+    public List<Coffee> searchByKeyword(String keyword) {
+        return coffeeRepository.findByBrandOrNameContaining(keyword);
     }
 
 }
