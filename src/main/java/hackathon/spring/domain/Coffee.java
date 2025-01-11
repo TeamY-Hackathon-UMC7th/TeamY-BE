@@ -1,9 +1,7 @@
 package hackathon.spring.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import hackathon.spring.domain.enums.Brand;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -18,18 +16,23 @@ public class Coffee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(nullable = false)
+    private String name; // 이름 (NOT NULL)
 
-    private String brand;
+    @Enumerated(EnumType.STRING) // 브랜드는 Enum 타입
+    @Column(nullable = false)
+    private Brand brand; // 브랜드 (NOT NULL)
 
-    private Integer sugar;
+    @Column(nullable = false)
+    private Integer sugar; // 설탕 (NOT NULL)
 
-    private Integer caffeine;
+    @Column(nullable = false)
+    private Integer caffeine; // 카페인 (NOT NULL)
 
-    private Integer calories;
+    private Integer calories; // 칼로리 (NULL 허용)
 
-    private Integer protein;
+    private Integer protein; // 단백질 (NULL 허용)
 
-    private String coffeeImgUrl;
+    private String coffeeImgUrl; // 커피 이미지 URL (NULL 허용)
 
 }
