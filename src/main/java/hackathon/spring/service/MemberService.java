@@ -33,17 +33,11 @@ public class MemberService {
         return ResponseEntity.ok(ApiResponse.onSuccess("사용 가능한 닉네임입니다."));
     }
 
-    public ResponseEntity<ApiResponse<String>> signUp(MemberDto.JoinResultDto memberDto) {
-        if (memberDto == null || memberDto.getNickname() == null || memberDto.getNickname().trim().isEmpty()) {
-            return ResponseEntity
-                    .status(ErrorStatus._EMPTY_NICKNAME.getHttpStatus())
-                    .body(ApiResponse.onFailure(
-                            ErrorStatus._EMPTY_NICKNAME.getCode(),
-                            ErrorStatus._EMPTY_NICKNAME.getMessage(),
-                            null));
+    public ResponseEntity<ApiResponse<String>> signUp(String nickname) {
+        if (nickname == null || nickname.trim().isEmpty()) {
+            ResponseEntity.status(ErrorStatus._BAD_REQUEST.getHttpStatus()).body("닉네임은 빈 값일 수 없습니다.");
         }
-
-        if (memberRepository.existsByNickname(memberDto.getNickname())) {
+        if (memberRepository.existsByNickname(nickname)) {
             return ResponseEntity
                     .status(ErrorStatus._BAD_REQUEST.getHttpStatus())
                     .body(ApiResponse.onFailure(
@@ -53,28 +47,19 @@ public class MemberService {
         }
 
         Member member = Member.builder()
-                .nickname(memberDto.getNickname())
+                .nickname(nickname)
                 .build();
         memberRepository.save(member);
 
-        String token = JwtTokenProvider.generateToken(memberDto.getNickname());
+        String token = JwtTokenProvider.generateToken(nickname);
         return ResponseEntity.ok(ApiResponse.onSuccess(token));
     }
 
-    public ResponseEntity<ApiResponse<String>> login(MemberDto.JoinResultDto memberDto) {
-        if (memberDto == null || memberDto.getNickname() == null || memberDto.getNickname().trim().isEmpty()) {
-            return ResponseEntity
-                    .status(ErrorStatus._EMPTY_NICKNAME.getHttpStatus())
-                    .body(ApiResponse.onFailure(
-                            ErrorStatus._EMPTY_NICKNAME.getCode(),
-                            ErrorStatus._EMPTY_NICKNAME.getMessage(),
-                            null));
-        }
-
-        Optional<Member> member = memberRepository.findByNickname(memberDto.getNickname());
+    public ResponseEntity<ApiResponse<String>> login(String nickname) {
+        Optional<Member> member = memberRepository.findByNickname(nickname);
 
         if (member.isPresent()) {
-            String token = JwtTokenProvider.generateToken(memberDto.getNickname());
+            String token = JwtTokenProvider.generateToken(nickname);
             return ResponseEntity.ok(ApiResponse.onSuccess(token));
         } else {
             return ResponseEntity
