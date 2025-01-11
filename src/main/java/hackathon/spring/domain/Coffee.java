@@ -1,5 +1,6 @@
 package hackathon.spring.domain;
 
+import hackathon.spring.domain.common.BaseEntity;
 import hackathon.spring.domain.enums.Brand;
 import jakarta.persistence.*;
 import lombok.*;
