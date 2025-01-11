@@ -29,4 +29,14 @@ public class MemberDto {
     public static class JoinResponseDto{
         boolean status;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginResponseDto{
+        String nickname;
+        String token;
+    }
+
 }

@@ -61,20 +61,22 @@ public class MemberService {
                 .build();
         memberRepository.save(member);
 
-        MemberDto.JoinResponseDto joinResponseDto = MemberDto.JoinResponseDto.builder()
-                .status(true)
-                .build();
+        return ResponseEntity.ok(ApiResponse.onSuccess(null));
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(joinResponseDto));
     }
 
-    public ResponseEntity<ApiResponse<String>> login(String nickname) {
+    public ResponseEntity<ApiResponse<MemberDto.LoginResponseDto>> login(String nickname) {
         Optional<Member> member = memberRepository.findByNickname(nickname);
 
         if (member.isPresent()) {
             String token = JwtTokenProvider.generateToken(nickname);
-            return ResponseEntity.ok(ApiResponse.onSuccess(token));
+            MemberDto.LoginResponseDto joinResponseDto = MemberDto.LoginResponseDto.builder()
+                    .nickname(nickname)
+                    .token(token)
+                    .build();
+            return ResponseEntity.ok(ApiResponse.onSuccess(joinResponseDto));
         } else {
+
             return ResponseEntity
                     .status(ErrorStatus._UNAUTHORIZED.getHttpStatus())
                     .body(ApiResponse.onFailure(

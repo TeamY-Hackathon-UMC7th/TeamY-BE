@@ -35,7 +35,7 @@ public class MemberRestController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(@RequestParam
+    public ResponseEntity<ApiResponse<MemberDto.LoginResponseDto>> login(@RequestParam
                                                      @NotNull @NotBlank
                                                      @Size(max=20)String nickname) {
         return memberService.login(nickname);
