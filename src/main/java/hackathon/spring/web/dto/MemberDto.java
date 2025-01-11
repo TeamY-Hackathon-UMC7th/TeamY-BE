@@ -38,4 +38,5 @@ public class MemberDto {
         String nickname;
         String token;
     }
+
 }
