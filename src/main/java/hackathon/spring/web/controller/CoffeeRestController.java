@@ -76,7 +76,7 @@ public class CoffeeRestController {
     @Operation(
             summary = "음료 검색 API",
             description = """
-             브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노, 스타벅스 아메리카노
+             브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노
                 """
     )
     public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(@RequestParam("keyword") String keyword) {
