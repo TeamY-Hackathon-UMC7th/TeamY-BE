@@ -22,17 +22,17 @@ public class Coffee {
 
     @Enumerated(EnumType.STRING) // 브랜드는 Enum 타입
     @Column(nullable = false)
-    private Brand brand; // 브랜드 (NOT NULL)
+    private Brand brand; //
 
     @Column(nullable = false)
-    private Integer sugar; // 설탕 (NOT NULL)
+    private Integer sugar; //
 
     @Column(nullable = false)
-    private Integer caffeine; // 카페인 (NOT NULL)
+    private Integer caffeine; //
 
-    private Integer calories; // 칼로리 (NULL 허용)
+    private Integer calories; //
 
-    private Integer protein; // 단백질 (NULL 허용)
+    private Integer protein; //
 
     private String coffeeImgUrl; // 커피 이미지 URL (NULL 허용)
 
