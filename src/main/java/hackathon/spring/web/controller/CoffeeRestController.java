@@ -47,7 +47,7 @@ public class CoffeeRestController {
 //    }
 
 
-    @PostMapping("/recommend")
+    @GetMapping("/recommend")
     @Operation(
             summary = "카페인 농도에 따라 음료 추천 API",
             description = """
@@ -55,8 +55,8 @@ public class CoffeeRestController {
                 - 요청 본문에는 userTimeInput, 즉 사용자가 자고싶은 시간이 포함되어야 합니다.
                 """
     )
-    public ResponseEntity<ApiResponse<CoffeeDto>> recommendCoffees(@RequestBody TimeRequestDto timeRequestDto) {
-        return coffeeService.recommendByCaffeineLimit(timeRequestDto.getUserTimeInput());
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendCoffees(@RequestParam("time") String time) {
+        return coffeeService.recommendByCaffeineLimit(time);
     }
 
     @GetMapping("/popular")
