@@ -1,7 +1,6 @@
 <div align=center>
 
 # ☕ LastCoffee_Backend ☕
-<div align="center">
 
 ## 👶🏼 Backend Members 👶🏼
 <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/106726806?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/147061193?v=4"/> | 
