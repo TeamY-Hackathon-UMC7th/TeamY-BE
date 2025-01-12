@@ -14,7 +14,7 @@ public enum ErrorStatus implements BaseErrorCode {
     //가장 일반적인 응답
     _INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 에러, 관리자에게 문의 바랍니다."),
     _BAD_REQUEST(HttpStatus.BAD_REQUEST,"COMMON400","잘못된 요청입니다."),
-    _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","인증이 필요합니다."),
+    _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","존재하지 않는 닉네임입니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     //멤버 관련 응답
@@ -24,10 +24,14 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //리뷰 관련 응답
     _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다."),
+    _REVIEW_NOT_EXIST(HttpStatus.NOT_FOUND, "REVIEW405", "해당 사용자가 리뷰를 작성하지 않았습니다."),
 
     //시간 관련 응답
     _EMPTY_TIME_INPUT(HttpStatus.BAD_REQUEST, "TIME400", "시간을 입력해야 합니다."),
     _INVALID_TIME_FORMAT(HttpStatus.BAD_REQUEST, "TIME401", "24시 형태로 입력해주세요."),
+
+    //토큰 관련 응답
+    _NEED_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN400", "로그인이 되지 않았습니다."),
 
     //커피 관련 응답
     _COFFEE_NOT_FOUND(HttpStatus.NOT_FOUND, "COFFEE404", "존재하지 않는 커피입니다.");
