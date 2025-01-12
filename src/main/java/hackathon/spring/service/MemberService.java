@@ -40,19 +40,24 @@ public class MemberService {
         MemberDto.JoinResponseDto joinResponseDto = MemberDto.JoinResponseDto.builder()
                 .status(true)
                 .build();
-        return ResponseEntity.ok(ApiResponse.onSuccess(joinResponseDto));
+        return ResponseEntity
+                .status(SuccessStatus. _AVAILABLE_NICKNAME.getHttpStatus())
+                .body(ApiResponse.onSuccess(
+                        SuccessStatus._AVAILABLE_NICKNAME.getCode(),
+                        SuccessStatus. _AVAILABLE_NICKNAME.getMessage(),
+                        joinResponseDto));
     }
 
     public ResponseEntity<ApiResponse<MemberDto.JoinResponseDto>> signUp(String nickname) {
         if (nickname == null || nickname.trim().isEmpty()) {
-            ResponseEntity.status(ErrorStatus._BAD_REQUEST.getHttpStatus()).body("닉네임은 빈 값일 수 없습니다.");
+            ResponseEntity.status(ErrorStatus._EMPTY_NICKNAME.getHttpStatus()).body("닉네임은 빈 값일 수 없습니다.");
         }
         if (memberRepository.existsByNickname(nickname)) {
             return ResponseEntity
-                    .status(ErrorStatus._BAD_REQUEST.getHttpStatus())
+                    .status(ErrorStatus._DUPLICATE_NICKNAME.getHttpStatus())
                     .body(ApiResponse.onFailure(
-                            ErrorStatus._BAD_REQUEST.getCode(),
-                            ErrorStatus._BAD_REQUEST.getMessage(),
+                            ErrorStatus._DUPLICATE_NICKNAME.getCode(),
+                            ErrorStatus._DUPLICATE_NICKNAME.getMessage(),
                             null));
         }
 
@@ -61,7 +66,12 @@ public class MemberService {
                 .build();
         memberRepository.save(member);
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(null));
+        return ResponseEntity
+                .status(SuccessStatus. _SIGNUP_SUCCESS.getHttpStatus())
+                .body(ApiResponse.onSuccess(
+                        SuccessStatus._SIGNUP_SUCCESS.getCode(),
+                        SuccessStatus. _SIGNUP_SUCCESS.getMessage(),
+                        null));
 
     }
 
@@ -74,14 +84,19 @@ public class MemberService {
                     .nickname(nickname)
                     .token(token)
                     .build();
-            return ResponseEntity.ok(ApiResponse.onSuccess(joinResponseDto));
+            return ResponseEntity
+                    .status(SuccessStatus._LOGIN_SUCCESS.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            SuccessStatus._LOGIN_SUCCESS.getCode(),
+                            SuccessStatus._LOGIN_SUCCESS.getMessage(),
+                            joinResponseDto));
         } else {
 
             return ResponseEntity
-                    .status(ErrorStatus._UNAUTHORIZED.getHttpStatus())
+                    .status(ErrorStatus._NOT_REGISTERED_USER.getHttpStatus())
                     .body(ApiResponse.onFailure(
-                            ErrorStatus._UNAUTHORIZED.getCode(),
-                            ErrorStatus._UNAUTHORIZED.getMessage(),
+                            ErrorStatus._NOT_REGISTERED_USER.getCode(),
+                            ErrorStatus._NOT_REGISTERED_USER.getMessage(),
                             null));
         }
     }
