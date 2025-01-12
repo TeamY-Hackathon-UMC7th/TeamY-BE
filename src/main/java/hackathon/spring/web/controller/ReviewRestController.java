@@ -1,12 +1,14 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.apiPayload.exception.Handler.ReviewHandler;
 import hackathon.spring.domain.Member;
 import hackathon.spring.domain.Review;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.ReviewService;
 import hackathon.spring.web.dto.ReviewDto;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,7 @@ public class ReviewRestController {
     )
     public ResponseEntity<ApiResponse<String>> createReview(
             @RequestHeader("Authorization") String token,
-            @RequestBody ReviewDto reviewRequestDTO) {
+            @RequestBody @Valid ReviewDto reviewRequestDTO) {
 
         try {
             String nickname = reviewService.extractNicknameFromToken(token);
@@ -69,16 +71,11 @@ public class ReviewRestController {
               로그인 된 사용자가 어제 먹은 음료에 대해 언제 잠이 들었는지 커멘트와 함께 작성한 회고를 조회하는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse<Optional<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
+    public ResponseEntity<ApiResponse<List<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
         String nickname = reviewService.extractNicknameFromToken(token);
         Optional<Member> member = memberRepository.findByNickname(nickname);
-        Optional<Review> allReviews = reviewService.getAllReviews(member.get().getId());
+        List<Review> allReviews = reviewService.getAllReviews(member.get().getId());
 
-        if (allReviews.isEmpty()) {
-            return ResponseEntity.ok(
-                    ApiResponse.onSuccess( Optional.empty(), "No reviews found for the given member.")
-            );
-        }
         return ResponseEntity.ok(ApiResponse.onSuccess(allReviews));
     }
 
