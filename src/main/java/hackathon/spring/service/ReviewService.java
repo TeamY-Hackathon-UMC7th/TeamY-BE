@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.apiPayload.exception.Handler.ReviewHandler;
 import hackathon.spring.domain.Coffee;
@@ -70,12 +71,17 @@ public class ReviewService {
                     .build();
 
             reviewRepository.save(review);
-            return ResponseEntity.ok(ApiResponse.onSuccess("Review created successfully!"));
+            return ResponseEntity
+                    .status(SuccessStatus._REVIEW_SUCCESS.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            SuccessStatus._REVIEW_SUCCESS.getCode(),
+                            SuccessStatus._REVIEW_SUCCESS.getMessage(),
+                            "Review created successfully!"));
         } else {
-            return ResponseEntity.status(ErrorStatus._UNAUTHORIZED.getHttpStatus())
+            return ResponseEntity.status(ErrorStatus. _NOT_REGISTERED_USER.getHttpStatus())
                     .body(ApiResponse.onFailure(
-                            ErrorStatus._UNAUTHORIZED.getCode(),
-                            ErrorStatus._UNAUTHORIZED.getMessage(),
+                            ErrorStatus. _NOT_REGISTERED_USER.getCode(),
+                            ErrorStatus. _NOT_REGISTERED_USER.getMessage(),
                             null));
         }
     }
@@ -87,8 +93,12 @@ public class ReviewService {
 
         if (!review.getMember().getNickname().equals(nickname)) {
             System.out.println("자신이 쓴 리뷰인지 확인하는 과정입니다. ");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.onFailure("401", "자신이 쓴 리뷰가 아니므로 지울 수 없습니다", null));
+            return ResponseEntity
+                    .status(ErrorStatus._REVIEW_NOT_EXIST.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            ErrorStatus._REVIEW_NOT_EXIST.getCode(),
+                            ErrorStatus._REVIEW_NOT_EXIST.getMessage(),
+                            null));
         }
 
         reviewRepository.delete(review);
