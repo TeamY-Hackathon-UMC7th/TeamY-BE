@@ -9,6 +9,7 @@ import hackathon.spring.web.dto.CoffeeDto;
 import hackathon.spring.web.dto.MemberDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -57,7 +58,7 @@ public class CoffeeRestController {
                 - 요청 본문에는 userTimeInput, 즉 사용자가 자고싶은 시간이 포함되어야 합니다.
                 """
     )
-    public ResponseEntity<ApiResponse<CoffeeDto>> recommendCoffees(@RequestParam("time") @Max(24)String time) {
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendCoffees(@RequestParam("time") @Max(24)Integer time) {
         return coffeeService.recommendByCaffeineLimit(time);
     }
 

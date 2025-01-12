@@ -59,14 +59,12 @@ public class CoffeeService {
         return coffeeRepository.save(newCoffee);
     }
 
-    public ResponseEntity<ApiResponse<CoffeeDto>> recommendByCaffeineLimit(String userTimeInput) {
-        if (userTimeInput == null || userTimeInput.trim().isEmpty()) {
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendByCaffeineLimit(Integer userHourInput) {
+        if (userHourInput == null) {
             throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
         }
 
-        int userHourInput;
         try {
-            userHourInput = Integer.parseInt(userTimeInput);
             if (userHourInput < 0 || userHourInput > 23) {
                 throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
             }
