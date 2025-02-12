@@ -20,6 +20,8 @@ public enum ErrorStatus implements BaseErrorCode {
     //멤버 관련 응답
     _DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER409", "이미 사용 중인 닉네임입니다."),
     _EMPTY_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER400", "닉네임을 입력해야 합니다."),
+    _MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "사용자가 없습니다."),
+    _LOGIN_FAILED(HttpStatus.UNAUTHORIZED,"MEMBER401", "비밀번호가 틀렸습니다."),
 
     //리뷰 관련 응답
     _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다."),

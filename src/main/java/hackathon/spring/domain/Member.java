@@ -14,4 +14,7 @@ public class Member {
     @Id
     @Column(nullable = false, unique = true,columnDefinition = "VARCHAR(20)")
     private String nickname;
+
+    @Column(nullable = false)
+    private String password;
 }

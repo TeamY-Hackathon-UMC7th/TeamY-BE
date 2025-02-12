@@ -11,8 +11,41 @@ public class MemberDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class JoinRequestDto {
+
+        private String nickname;
+        private String password;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class JoinResultDto {
 
-        String nickname;
+        private String nickname;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginRequestDto {
+
+        private String nickname;
+        private String password;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginResultDto {
+
+        private String nickname;
+        private String accessToken;
+        private String refreshToken;
+        private long accessTokenExpiresIn;
+        private long refreshTokenExpiresIn;
     }
 }

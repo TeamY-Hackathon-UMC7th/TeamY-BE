@@ -23,7 +23,7 @@ public class MemberRestController {
                사용자가 원하는 닉네임의 중복된 닉네임이 이미 등록됐는지 확인하는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse<String>> checkNickname(@PathVariable String nickname) {
+    public ResponseEntity<ApiResponse> checkNickname(@PathVariable String nickname) {
         return memberService.checkNickname(nickname);
     }
 
@@ -35,7 +35,7 @@ public class MemberRestController {
               닉네임 중복체크 후 회원가입을 하는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse<String>> signUp(@RequestBody MemberDto.JoinResultDto memberDto) {
+    public ResponseEntity<ApiResponse> signUp(@RequestBody MemberDto.JoinRequestDto memberDto) {
         return memberService.signUp(memberDto);
     }
 
@@ -44,7 +44,7 @@ public class MemberRestController {
     @Operation(
             summary = "로그인 API"
     )
-    public ResponseEntity<ApiResponse<String>> login(@RequestBody MemberDto.JoinResultDto memberDto) {
+    public ResponseEntity<ApiResponse> login(@RequestBody MemberDto.LoginRequestDto memberDto) {
         return memberService.login(memberDto);
     }
 }
