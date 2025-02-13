@@ -10,6 +10,7 @@ import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.web.dto.MemberDto;
 import hackathon.spring.domain.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,7 @@ public class MemberService {
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
-    public ResponseEntity<ApiResponse> login(MemberDto.LoginRequestDto memberDto) {
+    public ResponseEntity<ResponseEntity<ApiResponse>> login(MemberDto.LoginRequestDto memberDto) {
         if (memberDto == null || memberDto.getNickname() == null || memberDto.getNickname().trim().isEmpty()) {
             throw new GeneralException(ErrorStatus._EMPTY_NICKNAME);
         }
@@ -72,6 +73,21 @@ public class MemberService {
         String accessToken = jwtTokenProvider.generateAccessToken(member.getNickname());
         String refreshToken = jwtTokenProvider.generateRefreshToken(member.getNickname());
 
+        // Set-Cookie 헤더로 토큰 저장
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)  // HTTPS 환경에서만
+                .path("/")
+                .maxAge(jwtTokenProvider.getAccessTokenExpiration() / 1000)
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
+                .build();
+
         MemberDto.LoginResultDto response = MemberDto.LoginResultDto.builder()
                 .nickname(member.getNickname())
                 .accessToken(accessToken)
@@ -80,6 +96,9 @@ public class MemberService {
                 .refreshTokenExpiresIn(jwtTokenProvider.getRefreshTokenExpiration())
                 .build();
 
-        return ApiResponse.onSuccess(SuccessStatus._OK, response);
+        return ResponseEntity.ok()
+                .header("Set-Cookie", accessCookie.toString())
+                .header("Set-Cookie", refreshCookie.toString())
+                .body(ApiResponse.onSuccess(SuccessStatus._OK, response));
     }
 }

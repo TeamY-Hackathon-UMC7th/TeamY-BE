@@ -44,7 +44,7 @@ public class MemberRestController {
     @Operation(
             summary = "로그인 API"
     )
-    public ResponseEntity<ApiResponse> login(@RequestBody MemberDto.LoginRequestDto memberDto) {
+    public ResponseEntity<ResponseEntity<ApiResponse>> login(@RequestBody MemberDto.LoginRequestDto memberDto) {
         return memberService.login(memberDto);
     }
 }
