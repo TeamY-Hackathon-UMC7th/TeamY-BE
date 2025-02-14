@@ -86,4 +86,17 @@ public class MemberRestController {
     public ResponseEntity<ApiResponse<Object>> refresh() {
         return memberService.refresh();
     }
+
+    @PutMapping("/password/update")
+    @Operation(
+            summary = "비밀번호 변경 API",
+            description = """
+              비밀번호 변경하는 API입니다.
+                """
+    )
+    public ResponseEntity<ApiResponse> updatePassword(@RequestBody MemberDto.PasswordChangeRequestDto passwordDto) {
+        return memberService.updatePassword(passwordDto);
+    }
+
+
 }

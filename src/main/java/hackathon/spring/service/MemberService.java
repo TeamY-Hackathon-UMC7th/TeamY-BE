@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.util.Objects;
@@ -248,4 +249,59 @@ public class MemberService {
                 .headers(headers)
                 .body(ApiResponse.onSuccess(SuccessStatus._OK, response).getBody());
     }
+
+    public ResponseEntity<ApiResponse> updatePassword(MemberDto.PasswordChangeRequestDto passwordDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Optional<Member> member = memberRepository.findByEmail(email);
+
+        if(member.isEmpty()){
+            return ResponseEntity
+                    .status(ErrorStatus._MEMBER_NOT_FOUND.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            ErrorStatus._MEMBER_NOT_FOUND.getCode(),
+                            ErrorStatus._MEMBER_NOT_FOUND.getMessage(),
+                            null));
+        }
+
+        String storedPassword = member.get().getPassword(); // DB에 저장된 해싱된 비밀번호
+        String currentPassword = passwordDto.getCurrentPassword();
+        String updatePassword = passwordDto.getUpdatePassword();
+
+        // 입력한 비밀번호와 비교
+        if(!passwordEncoder.matches(currentPassword, storedPassword)){
+            return ResponseEntity
+                    .status(ErrorStatus._LOGIN_FAILED.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            ErrorStatus._LOGIN_FAILED.getCode(),
+                            ErrorStatus._LOGIN_FAILED.getMessage(),
+                            null));
+        }
+        if (passwordEncoder.matches(updatePassword, storedPassword)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.onFailure("400", "이전 비밀번호와 같습니다.", null));
+        }
+
+        if (!PasswordValidator.isValidPassword(updatePassword)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.onFailure("400", "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.", null));
+        }
+
+        if(!Objects.equals(passwordDto.getCheckPassword(), updatePassword)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.onFailure("400", "비밀번호가 일치하지 않습니다.", null));
+        }
+
+        String encodedPassword = passwordEncoder.encode(updatePassword);
+
+        Member memberEntity = member.get();
+        memberEntity.setPassword(encodedPassword);
+
+        // DB에 저장
+        memberRepository.save(memberEntity);
+
+        return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "비밀번호가 변경되었습니다.");
+    }
+
 }

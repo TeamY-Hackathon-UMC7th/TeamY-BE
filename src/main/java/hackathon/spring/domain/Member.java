@@ -2,6 +2,7 @@ package hackathon.spring.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Setter
@@ -25,4 +26,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
+    public void setPassword(String password) {
+        this.password = password;  // 비밀번호 해싱
+    }
 }

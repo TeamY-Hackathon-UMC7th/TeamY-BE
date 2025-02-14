@@ -72,4 +72,16 @@ public class MemberDto {
         private long accessTokenExpiresIn;
         private long refreshTokenExpiresIn;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PasswordChangeRequestDto {
+
+        private String currentPassword;
+        private String updatePassword;
+        private String checkPassword;
+
+    }
 }
