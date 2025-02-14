@@ -2,9 +2,15 @@ package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Coffee;
+import hackathon.spring.domain.Review;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.service.CoffeeService;
+import hackathon.spring.web.dto.CoffeeDto;
+import hackathon.spring.web.dto.MemberDto;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +50,7 @@ public class CoffeeRestController {
 //    }
 
 
-    @PostMapping("/recommend")
+    @GetMapping("/recommend")
     @Operation(
             summary = "카페인 농도에 따라 음료 추천 API",
             description = """
@@ -52,9 +58,8 @@ public class CoffeeRestController {
                 - 요청 본문에는 userTimeInput, 즉 사용자가 자고싶은 시간이 포함되어야 합니다.
                 """
     )
-    public ResponseEntity<List<Coffee>> recommendCoffees(@RequestBody TimeRequestDto timeRequestDto) {
-        List<Coffee> recommendedCoffees = coffeeService.recommendByCaffeineLimit(timeRequestDto.getUserTimeInput());
-        return ResponseEntity.ok(recommendedCoffees);
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendCoffees(@RequestParam("time") @Max(24)Integer time) {
+        return coffeeService.recommendByCaffeineLimit(time);
     }
 
     @GetMapping("/popular")
@@ -64,7 +69,7 @@ public class CoffeeRestController {
               랜덤으로 인기 있는 음료 5개를 추천해주는 API입니다.
                 """
     )
-    public List<Coffee> getPopularCoffees() {
+    public ResponseEntity<ApiResponse<CoffeeDto>> getPopularCoffees() {
         return coffeeService.recommendPopularCoffees();
     }
 
@@ -72,13 +77,14 @@ public class CoffeeRestController {
     @Operation(
             summary = "음료 검색 API",
             description = """
-             브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노, 스타벅스 아메리카노
+             브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노
                 """
     )
-    public ResponseEntity<List<Coffee>> searchByKeyword(@RequestParam("keyword") String keyword) {
-        List<Coffee> coffees = coffeeService.searchByKeyword(keyword);
-        return ResponseEntity.ok(coffees);
+    public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(@RequestParam("keyword") String keyword) {
+        return coffeeService.searchByKeyword(keyword);
     }
+
+
 
 
 

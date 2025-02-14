@@ -12,7 +12,16 @@ import org.springframework.http.HttpStatus;
 public enum SuccessStatus implements BaseCode {
 
     // 일반적인 응답
-    _OK(HttpStatus.OK, "COMMON200", "성공입니다.");
+    _OK(HttpStatus.OK, "COMMON200", "성공입니다."),
+
+    // 멤버 응답
+    _LOGIN_SUCCESS(HttpStatus.OK, "MEMBER200", "로그인에 성공했습니다."),
+    _SIGNUP_SUCCESS(HttpStatus.OK, "MEMBER201", "회원가입에 성공했습니다."),
+    _AVAILABLE_NICKNAME(HttpStatus.OK, "MEMBER200", "사용 가능한 닉네임입니다."),
+
+    // 리뷰 관련 코드
+    _REVIEW_SUCCESS(HttpStatus.OK, "REVIEW201", "리뷰 작성에 성공했습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;

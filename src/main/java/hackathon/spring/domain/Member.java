@@ -19,7 +19,7 @@ public class Member {
     @Column(nullable = false)
     private String email;
 
-    @Column(columnDefinition = "VARCHAR(20)")
+    @Column(columnDefinition = "VARCHAR(10)")
     private String nickname;
 
     @Column(nullable = false)

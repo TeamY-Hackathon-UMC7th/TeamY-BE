@@ -4,6 +4,9 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.service.MemberService;
 import hackathon.spring.web.dto.MemberDto;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +21,9 @@ public class MemberRestController {
     // 닉네임 중복 체크
     @GetMapping("/check/{nickname}")
     @Operation(
-            summary = "닉네임 중복체크 API",
+            summary = "닉네임 중복 체크 API",
             description = """
-               사용자가 원하는 닉네임의 중복된 닉네임이 이미 등록됐는지 확인하는 API입니다.
+             닉네임 중복을 체크하는 API입니다.
                 """
     )
     public ResponseEntity<ApiResponse> checkNickname(@PathVariable String nickname) {
@@ -32,7 +35,7 @@ public class MemberRestController {
     @Operation(
             summary = "회원가입 API",
             description = """
-              닉네임 중복체크 후 회원가입을 하는 API입니다.
+              닉네임으로 회원가입하는 API입니다.
                 """
     )
     public ResponseEntity<ApiResponse> signUp(@RequestBody MemberDto.JoinRequestDto memberDto) {
@@ -42,7 +45,10 @@ public class MemberRestController {
     // 로그인
     @PostMapping("/login")
     @Operation(
-            summary = "로그인 API"
+            summary = "로그인 API",
+            description = """
+              로그인하는 API입니다.
+                """
     )
     public ResponseEntity<ApiResponse<Object>> login(@RequestBody MemberDto.LoginRequestDto memberDto) {
         return memberService.login(memberDto);

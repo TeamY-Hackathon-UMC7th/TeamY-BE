@@ -1,5 +1,9 @@
 package hackathon.spring.web.dto;
 
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +17,9 @@ public class MemberDto {
     @AllArgsConstructor
     public static class JoinRequestDto {
 
+        @NotNull
+        @NotBlank
+        @Size(message = "이메일은 50자 이하로 적어주세요", max=50)
         private String email;
         private String password;
     }

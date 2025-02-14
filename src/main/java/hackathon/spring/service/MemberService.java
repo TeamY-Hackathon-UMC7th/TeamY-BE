@@ -6,6 +6,7 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.apiPayload.exception.GeneralException;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.web.dto.MemberDto;
 import hackathon.spring.domain.Member;
