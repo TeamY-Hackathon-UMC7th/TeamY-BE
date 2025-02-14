@@ -87,11 +87,19 @@ public class ReviewService {
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<String>> deleteReview(Long reviewId, String nickname) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
+    public ResponseEntity<ApiResponse<String>> deleteReview(Long reviewId, String email) {
+        Optional<Review> optionalReview = reviewRepository.findById(reviewId);
 
-        if (!review.getMember().getNickname().equals(nickname)) {
+        if(optionalReview.isEmpty()){
+            return ResponseEntity
+                    .status(ErrorStatus._REVIEW_NOT_FOUND.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            ErrorStatus._REVIEW_NOT_FOUND.getCode(),
+                            ErrorStatus._REVIEW_NOT_FOUND.getMessage(),
+                            null));
+        }
+        Review review = optionalReview.get();
+        if (!review.getMember().getEmail().equals(email)) {
             System.out.println("자신이 쓴 리뷰인지 확인하는 과정입니다. ");
             return ResponseEntity
                     .status(ErrorStatus._REVIEW_NOT_EXIST.getHttpStatus())

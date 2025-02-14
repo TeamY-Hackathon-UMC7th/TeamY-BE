@@ -30,6 +30,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class JoinResultDto {
 
+        private Long Id;
         private String email;
     }
 
@@ -49,6 +50,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class LoginResultDto {
 
+        private Long Id;
         private String email;
         private String accessToken;
         private String refreshToken;

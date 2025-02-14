@@ -6,7 +6,6 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.apiPayload.exception.GeneralException;
-import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.web.dto.MemberDto;
 import hackathon.spring.domain.Member;
@@ -70,19 +69,24 @@ public class MemberService {
                     .body(ApiResponse.onFailure("400", "이메일은 필수 입력값입니다.", null));
         }
 
-        if (!EmailValidator.isValidEmail(memberDto.getEmail())) {
+        String email = memberDto.getEmail();
+
+        if (!EmailValidator.isValidEmail(email)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.onFailure("400", "올바른 이메일 형식이 아닙니다.", null));
         }
+
+        if (memberRepository.existsByEmail(email))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.onFailure("400", "이미 사용중인 이메일입니다.", null));
 
         if (!PasswordValidator.isValidPassword(memberDto.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.onFailure("400", "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.", null));
         }
 
-        String email = memberDto.getEmail();
-        String nickname = email.substring(0, email.indexOf("@"));
 
+        String nickname = email.substring(0, email.indexOf("@"));
         String encodedPassword = passwordEncoder.encode(memberDto.getPassword());
 
         Member member = Member.builder()

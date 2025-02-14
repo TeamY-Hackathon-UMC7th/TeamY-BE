@@ -41,6 +41,10 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, code, message, data);
     }
 
+    public static <T> ApiResponse<T> onFailure(String code, String message) {
+        return new ApiResponse<>(false, code, message, null);
+    }
+
     public static ResponseEntity<ApiResponse> onSuccess(SuccessStatus status, Object result) {
         return ResponseEntity.ok(
                 new ApiResponse(true, status.getCode(), status.getMessage(), result));

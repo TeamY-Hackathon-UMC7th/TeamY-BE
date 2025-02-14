@@ -23,6 +23,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //멤버 관련 응답
     _DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER409", "이미 사용 중인 닉네임입니다."),
+    _DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "MEMBER409", "이미 사용 중인 이메일입니다."),
     _EMPTY_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER400", "닉네임을 입력해야 합니다."),
     _NOT_LOGIN_USER(HttpStatus.BAD_REQUEST, "MEMBER401", "로그인을 먼저 진행해야 합니다."),
     _NOT_REGISTERED_USER(HttpStatus.BAD_REQUEST, "MEMBER402", "회원가입을 먼저 진행해야 합니다."),

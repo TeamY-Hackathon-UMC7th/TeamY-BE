@@ -60,8 +60,9 @@ public class ReviewRestController {
             @RequestHeader("Authorization") String token,
             @PathVariable Long reviewId) {
 
-        String nickname = reviewService.extractEmailFromToken(token);
-        return reviewService.deleteReview(reviewId, nickname);
+        String email = reviewService.extractEmailFromToken(token);
+        System.out.println(email);
+        return reviewService.deleteReview(reviewId, email);
     }
 
     @GetMapping("")
@@ -72,7 +73,7 @@ public class ReviewRestController {
                 """
     )
     public ResponseEntity<ApiResponse<List<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
-        String email= reviewService.extractEmailFromToken(token);
+        String email = reviewService.extractEmailFromToken(token);
         Optional<Member> member = memberRepository.findByEmail(email);
         List<Review> allReviews = reviewService.getAllReviews(member.get().getId());
 
