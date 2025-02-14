@@ -12,7 +12,14 @@ import lombok.*;
 public class Member {
 
     @Id
-    @Column(nullable = false, unique = true,columnDefinition = "VARCHAR(20)")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    private long Id;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(columnDefinition = "VARCHAR(20)")
     private String nickname;
 
     @Column(nullable = false)

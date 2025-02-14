@@ -29,7 +29,7 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final CoffeeRepository coffeeRepository;
 
-    public String extractNicknameFromToken(String token) {
+    public String extractEmailFromToken(String token) {
         if (token == null || !token.startsWith("Bearer ")) {
             throw new RuntimeException("Token is missing or improperly formatted");
         }
@@ -46,8 +46,8 @@ public class ReviewService {
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<String>> createReview(ReviewDto dto, String nickname) {
-        Optional<Member> memberOptional = memberRepository.findByNickname(nickname);
+    public ResponseEntity<ApiResponse<String>> createReview(ReviewDto dto, String email) {
+        Optional<Member> memberOptional = memberRepository.findByEmail(email);
 
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();

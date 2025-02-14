@@ -44,7 +44,22 @@ public class MemberRestController {
     @Operation(
             summary = "로그인 API"
     )
-    public ResponseEntity<ResponseEntity<ApiResponse>> login(@RequestBody MemberDto.LoginRequestDto memberDto) {
+    public ResponseEntity<ApiResponse<Object>> login(@RequestBody MemberDto.LoginRequestDto memberDto) {
         return memberService.login(memberDto);
+    }
+
+    // 로그아웃
+    @PostMapping("members/logout")
+    @Operation(
+            summary = "로그아웃 API"
+    )
+    public ResponseEntity<ApiResponse> logout() {
+        return memberService.logout();
+    }
+
+    // 회원탈퇴
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse> deleteMember() {
+        return memberService.deleteMember();
     }
 }

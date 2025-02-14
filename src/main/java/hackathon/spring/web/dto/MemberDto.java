@@ -13,7 +13,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class JoinRequestDto {
 
-        private String nickname;
+        private String email;
         private String password;
     }
 
@@ -23,7 +23,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class JoinResultDto {
 
-        private String nickname;
+        private String email;
     }
 
     @Builder
@@ -32,7 +32,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class LoginRequestDto {
 
-        private String nickname;
+        private String email;
         private String password;
     }
 
@@ -42,7 +42,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class LoginResultDto {
 
-        private String nickname;
+        private String email;
         private String accessToken;
         private String refreshToken;
         private long accessTokenExpiresIn;

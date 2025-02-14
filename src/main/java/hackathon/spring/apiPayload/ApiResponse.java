@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import hackathon.spring.apiPayload.code.BaseCode;
-import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,8 +41,4 @@ public class ApiResponse<T> {
                 new ApiResponse(true, status.getCode(), status.getMessage(), result));
     }
 
-    public static ResponseEntity<ApiResponse> onFailure(ErrorStatus error) {
-        return new ResponseEntity<>(
-                new ApiResponse(false, error.getCode(), error.getMessage(), null), error.getHttpStatus());
-    }
 }

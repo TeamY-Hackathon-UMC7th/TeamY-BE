@@ -32,8 +32,8 @@ public class ReviewRestController {
             @RequestBody ReviewDto reviewRequestDTO) {
 
         try {
-            String nickname = reviewService.extractNicknameFromToken(token);
-            return reviewService.createReview(reviewRequestDTO, nickname);
+            String email = reviewService.extractEmailFromToken(token);
+            return reviewService.createReview(reviewRequestDTO, email);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.onFailure("401", e.getMessage(), null));
@@ -50,7 +50,7 @@ public class ReviewRestController {
             @RequestHeader("Authorization") String token,
             @PathVariable Long reviewId) {
 
-        String nickname = reviewService.extractNicknameFromToken(token);
+        String nickname = reviewService.extractEmailFromToken(token);
         return reviewService.deleteReview(reviewId, nickname);
     }
 
