@@ -1,82 +1,58 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
-import hackathon.spring.apiPayload.exception.Handler.ReviewHandler;
-import hackathon.spring.domain.Member;
-import hackathon.spring.domain.Review;
-import hackathon.spring.repository.MemberRepository;
-import hackathon.spring.service.ReviewService;
-import hackathon.spring.web.dto.ReviewDto;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
+import hackathon.spring.service.NoteService;
+import hackathon.spring.web.dto.NoteResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/review")
-public class ReviewRestController {
+@RequestMapping("/note")
+public class NoteRestController {
 
-    private final ReviewService reviewService;
-    private final MemberRepository memberRepository;
+    private final NoteService noteService;
+
+    @GetMapping("")
+    @Operation(summary = "전체 기록 조회 API", description = "사용자의 전체 기록 목록을 페이지네이션하여 조회합니다.")
+    public ResponseEntity<ApiResponse<NoteResponseDTO.GetAllNotesDTO>> getAllNotes(
+            @Parameter(description = "페이지 번호 (기본값: 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기 (기본값: 10)") @RequestParam(defaultValue = "10") int size) {
+        NoteResponseDTO.GetAllNotesDTO notes = noteService.getAllNotes(page, size);
+        return ResponseEntity.ok(ApiResponse.onSuccess(notes, SuccessStatus._OK.getMessage()));
+    }
+
+    @GetMapping("/{noteId}")
+    @Operation(summary = "단일 기록 조회 API", description = "지정된 noteId에 대한 기록 정보를 조회합니다.")
+    public ResponseEntity<ApiResponse<NoteResponseDTO.NoteDTO>> getNote(
+            @Parameter(description = "조회할 기록의 ID") @PathVariable Long noteId) {
+        NoteResponseDTO.NoteDTO note = noteService.getNote(noteId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(note, SuccessStatus._OK.getMessage()));
+    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("")
-    @Operation(
-            summary = "리뷰 작성 API",
-            description = """
-              어제 먹은 음료에 대해 언제 잠이 들었는지 커멘트와 함께 회고를 하는 리뷰 API입니다.
-                """
-    )
-    public ResponseEntity<ApiResponse<String>> createReview(
-            @RequestHeader("Authorization") String token,
-            @RequestBody @Valid ReviewDto reviewRequestDTO) {
-
-        try {
-            String nickname = reviewService.extractNicknameFromToken(token);
-            return reviewService.createReview(reviewRequestDTO, nickname);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.onFailure("401", e.getMessage(), null));
-        }
+    @Operation(summary = "기록 생성 API", description = "새로운 기록을 생성합니다. 인증이 필요합니다.")
+    public ResponseEntity<ApiResponse<String>> createNote(
+            @Parameter(description = "액세스 토큰") @RequestHeader("Authorization") String token,
+            @RequestBody @Valid NoteResponseDTO.NewNoteDTO noteRequestDTO) {
+//        String nickname = noteService.extractNicknameFromToken(token);
+        return ResponseEntity.ok(noteService.createNote(noteRequestDTO, memberId));
     }
-
 
     @PreAuthorize("isAuthenticated()")
-    @DeleteMapping("/{reviewId}")
-    @Operation(
-            summary = "로그인한 사용자의 리뷰 중 하나 삭제 API입니다.",
-            description = """
-              로그인 한 사용자가 작성한 리뷰를 삭제하는 API입니다.
-                """
-    )
-    public ResponseEntity<ApiResponse<String>> deleteReview(
-            @RequestHeader("Authorization") String token,
-            @PathVariable Long reviewId) {
-
-        String nickname = reviewService.extractNicknameFromToken(token);
-        return reviewService.deleteReview(reviewId, nickname);
+    @DeleteMapping("/{noteId}")
+    @Operation(summary = "기록 삭제 API", description = "지정된 noteId의 기록을 삭제합니다. 인증이 필요합니다.")
+    public ResponseEntity<ApiResponse<String>> deleteNote(
+            @Parameter(description = "액세스 토큰") @RequestHeader("Authorization") String token,
+            @Parameter(description = "삭제할 기록의 ID") @PathVariable Long noteId) {
+        String nickname = noteService.extractNicknameFromToken(token);
+        return ResponseEntity.ok(noteService.deleteNote(noteId, nickname));
     }
-
-    @GetMapping("")
-    @Operation(
-            summary = "로그인한 사용자의 모든 리뷰 가져오기 API입니다.",
-            description = """
-              로그인 된 사용자가 어제 먹은 음료에 대해 언제 잠이 들었는지 커멘트와 함께 작성한 회고를 조회하는 API입니다.
-                """
-    )
-    public ResponseEntity<ApiResponse<List<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
-        String nickname = reviewService.extractNicknameFromToken(token);
-        Optional<Member> member = memberRepository.findByNickname(nickname);
-        List<Review> allReviews = reviewService.getAllReviews(member.get().getId());
-
-        return ResponseEntity.ok(ApiResponse.onSuccess(allReviews));
-    }
-
 }

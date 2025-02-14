@@ -12,9 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 public class Member {
 
-//    @Id
-//    @Column(nullable = false, unique = true,columnDefinition = "VARCHAR(20)")
-//    private String nickname;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

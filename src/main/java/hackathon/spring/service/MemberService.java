@@ -79,7 +79,7 @@ public class MemberService {
         Optional<Member> member = memberRepository.findByNickname(nickname);
 
         if (member.isPresent()) {
-            String token = JwtTokenProvider.generateToken(nickname);
+            String token = JwtTokenProvider.generateToken(member.get().getId(), nickname);
             MemberDto.LoginResponseDto joinResponseDto = MemberDto.LoginResponseDto.builder()
                     .nickname(nickname)
                     .token(token)
