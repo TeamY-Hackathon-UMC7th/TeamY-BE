@@ -27,6 +27,11 @@ public class MemberDto {
         @Size(message = "비밀번호는 8~20자로 설정해주세요", max=20)
         private String password;
 
+        @NotNull
+        @NotBlank
+        @Size(message = "비밀번호는 8~20자로 설정해주세요", max=20)
+        private String checkPassword;
+
     }
 
     @Builder

@@ -64,6 +64,12 @@ public class MemberRestController {
     }
 
     // 회원탈퇴
+    @Operation(
+            summary = "회원탈퇴 API",
+            description = """
+              회원탈퇴하는 API입니다.
+                """
+    )
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse> deleteMember() {
         return memberService.deleteMember();
@@ -71,6 +77,12 @@ public class MemberRestController {
 
     // 액세스토큰 재발급
     @PostMapping("/refresh")
+    @Operation(
+            summary = "access 토큰 재발급 API",
+            description = """
+              refresh토큰으로 access토큰 재발급받는 API입니다.
+                """
+    )
     public ResponseEntity<ApiResponse<Object>> refresh() {
         return memberService.refresh();
     }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -69,7 +70,13 @@ public class MemberService {
                     .body(ApiResponse.onFailure("400", "이메일은 필수 입력값입니다.", null));
         }
 
+        if (memberDto.getPassword() == null || memberDto.getPassword().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.onFailure("400", "비밀번호를 필수 입력값입니다.", null));
+        }
+
         String email = memberDto.getEmail();
+        String password = memberDto.getPassword();
 
         if (!EmailValidator.isValidEmail(email)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -80,9 +87,14 @@ public class MemberService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.onFailure("400", "이미 사용중인 이메일입니다.", null));
 
-        if (!PasswordValidator.isValidPassword(memberDto.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        if (!PasswordValidator.isValidPassword(password)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.onFailure("400", "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.", null));
+        }
+
+        if (!Objects.equals(memberDto.getCheckPassword(), password)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.onFailure("400", "비밀번호가 일치하지 않습니다.", null));
         }
 
         String nickname = email.substring(0, email.indexOf("@"));
