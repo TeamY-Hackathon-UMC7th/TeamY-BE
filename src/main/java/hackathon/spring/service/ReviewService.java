@@ -5,6 +5,9 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
+import hackathon.spring.apiPayload.exception.GeneralException;
+import hackathon.spring.apiPayload.exception.Handler.ReviewHandler;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.Member;
 import hackathon.spring.domain.Review;
@@ -18,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,7 +32,7 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final CoffeeRepository coffeeRepository;
 
-    public String extractNicknameFromToken(String token) {
+    public String extractEmailFromToken(String token) {
         if (token == null || !token.startsWith("Bearer ")) {
             throw new RuntimeException("Token is missing or improperly formatted");
         }
@@ -45,8 +49,8 @@ public class ReviewService {
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<String>> createReview(ReviewDto dto, String nickname) {
-        Optional<Member> memberOptional = memberRepository.findByNickname(nickname);
+    public ResponseEntity<ApiResponse<String>> createReview(ReviewDto dto, String email) {
+        Optional<Member> memberOptional = memberRepository.findByEmail(email);
 
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
@@ -67,12 +71,17 @@ public class ReviewService {
                     .build();
 
             reviewRepository.save(review);
-            return ResponseEntity.ok(ApiResponse.onSuccess("Review created successfully!"));
+            return ResponseEntity
+                    .status(SuccessStatus._REVIEW_SUCCESS.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            SuccessStatus._REVIEW_SUCCESS.getCode(),
+                            SuccessStatus._REVIEW_SUCCESS.getMessage(),
+                            "Review created successfully!"));
         } else {
-            return ResponseEntity.status(ErrorStatus._UNAUTHORIZED.getHttpStatus())
+            return ResponseEntity.status(ErrorStatus. _NOT_REGISTERED_USER.getHttpStatus())
                     .body(ApiResponse.onFailure(
-                            ErrorStatus._UNAUTHORIZED.getCode(),
-                            ErrorStatus._UNAUTHORIZED.getMessage(),
+                            ErrorStatus. _NOT_REGISTERED_USER.getCode(),
+                            ErrorStatus. _NOT_REGISTERED_USER.getMessage(),
                             null));
         }
     }
@@ -80,15 +89,30 @@ public class ReviewService {
     @Transactional
     public ResponseEntity<ApiResponse<String>> deleteReview(Long reviewId, String nickname) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+                .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
 
         if (!review.getMember().getNickname().equals(nickname)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.onFailure("401", "You can only delete your own reviews.", null));
+            System.out.println("자신이 쓴 리뷰인지 확인하는 과정입니다. ");
+            return ResponseEntity
+                    .status(ErrorStatus._REVIEW_NOT_EXIST.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            ErrorStatus._REVIEW_NOT_EXIST.getCode(),
+                            ErrorStatus._REVIEW_NOT_EXIST.getMessage(),
+                            null));
         }
 
         reviewRepository.delete(review);
         return ResponseEntity.ok(ApiResponse.onSuccess("Review deleted successfully!"));
+    }
+
+    @Transactional
+    public List<Review> getAllReviews(Long memberId){
+        //자신이 쓴 리뷰만 모두 가져와야 함
+        List<Review> reviews = reviewRepository.findByMemberId(memberId);
+        if(reviews.isEmpty()) {
+            throw new ReviewHandler(ErrorStatus._REVIEW_NOT_FOUND);
+        }
+        return reviews;
     }
 
 }

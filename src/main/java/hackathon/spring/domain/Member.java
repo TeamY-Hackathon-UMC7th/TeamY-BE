@@ -12,6 +12,16 @@ import lombok.*;
 public class Member {
 
     @Id
-    @Column(nullable = false, unique = true) // 닉네임은 UNIQUE
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    private long Id;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(columnDefinition = "VARCHAR(10)")
     private String nickname;
+
+    @Column(nullable = false)
+    private String password;
 }

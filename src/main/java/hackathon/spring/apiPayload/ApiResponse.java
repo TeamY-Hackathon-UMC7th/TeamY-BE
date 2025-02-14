@@ -7,6 +7,7 @@ import hackathon.spring.apiPayload.code.BaseCode;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.ResponseEntity;
 
 @Getter
 @AllArgsConstructor
@@ -29,9 +30,24 @@ public class ApiResponse<T> {
             return new ApiResponse<>(true, code.getReasonHttpStatus().getCode() , code.getReasonHttpStatus().getMessage(), result);
     }
 
+    // 성공한 경우 응답 생성 (동적 메시지 추가)
+    public static <T> ApiResponse<T> onSuccess(T result, String customMessage) {
+        return new ApiResponse<>(true, SuccessStatus._OK.getCode(), customMessage != null ? customMessage : SuccessStatus._OK.getMessage(), result);
+    }
+
 
     //실패한 경우 응답 생성
     public static <T> ApiResponse<T> onFailure(String code, String message, T data) {
         return new ApiResponse<>(false, code, message, data);
+    }
+
+    public static ResponseEntity<ApiResponse> onSuccess(SuccessStatus status, Object result) {
+        return ResponseEntity.ok(
+                new ApiResponse(true, status.getCode(), status.getMessage(), result));
+    }
+
+
+    public static <T> ApiResponse<T> onSuccess(String code, String message, T data) {
+        return new ApiResponse<>(true, code, message, data);
     }
 }
