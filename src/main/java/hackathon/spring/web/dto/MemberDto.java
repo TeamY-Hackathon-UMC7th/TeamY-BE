@@ -21,7 +21,12 @@ public class MemberDto {
         @NotBlank
         @Size(message = "이메일은 50자 이하로 적어주세요", max=50)
         private String email;
+
+        @NotNull
+        @NotBlank
+        @Size(message = "비밀번호는 8~20자로 설정해주세요", max=20)
         private String password;
+
     }
 
     @Builder
@@ -30,7 +35,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class JoinResultDto {
 
-        private Long Id;
+        private Long id;
         private String email;
     }
 
@@ -40,7 +45,12 @@ public class MemberDto {
     @AllArgsConstructor
     public static class LoginRequestDto {
 
+        @NotNull
+        @NotBlank
         private String email;
+
+        @NotNull
+        @NotBlank
         private String password;
     }
 
@@ -50,7 +60,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class LoginResultDto {
 
-        private Long Id;
+        private Long id;
         private String email;
         private String accessToken;
         private String refreshToken;

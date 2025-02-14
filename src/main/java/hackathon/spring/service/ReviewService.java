@@ -114,13 +114,11 @@ public class ReviewService {
     }
 
     @Transactional
-    public List<Review> getAllReviews(Long memberId){
+    public ResponseEntity<ApiResponse> getAllReviews(Long memberId){
         //자신이 쓴 리뷰만 모두 가져와야 함
         List<Review> reviews = reviewRepository.findByMemberId(memberId);
-        if(reviews.isEmpty()) {
-            throw new ReviewHandler(ErrorStatus._REVIEW_NOT_FOUND);
-        }
-        return reviews;
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(reviews));
     }
 
 }

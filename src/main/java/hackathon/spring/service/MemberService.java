@@ -85,7 +85,6 @@ public class MemberService {
                     .body(ApiResponse.onFailure("400", "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.", null));
         }
 
-
         String nickname = email.substring(0, email.indexOf("@"));
         String encodedPassword = passwordEncoder.encode(memberDto.getPassword());
 
@@ -97,6 +96,7 @@ public class MemberService {
         memberRepository.save(member);
 
         MemberDto.JoinResultDto response = MemberDto.JoinResultDto.builder()
+                .id(member.getId())
                 .email(memberDto.getEmail())
                 .build();
 
@@ -140,6 +140,7 @@ public class MemberService {
                 .build();
 
         MemberDto.LoginResultDto response = MemberDto.LoginResultDto.builder()
+                .id(member.get().getId())
                 .email(member.get().getEmail())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

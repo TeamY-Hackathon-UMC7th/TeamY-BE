@@ -1,9 +1,7 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
-import hackathon.spring.apiPayload.exception.Handler.ReviewHandler;
 import hackathon.spring.domain.Member;
-import hackathon.spring.domain.Review;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.ReviewService;
 import hackathon.spring.web.dto.ReviewDto;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -65,19 +62,18 @@ public class ReviewRestController {
         return reviewService.deleteReview(reviewId, email);
     }
 
-    @GetMapping("")
+    @GetMapping
     @Operation(
             summary = "로그인한 사용자의 모든 리뷰 가져오기 API입니다.",
             description = """
               로그인 된 사용자가 어제 먹은 음료에 대해 언제 잠이 들었는지 커멘트와 함께 작성한 회고를 조회하는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse<List<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
+    public ResponseEntity<ApiResponse> getAllReviews( @RequestHeader("Authorization") String token){
         String email = reviewService.extractEmailFromToken(token);
         Optional<Member> member = memberRepository.findByEmail(email);
-        List<Review> allReviews = reviewService.getAllReviews(member.get().getId());
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(allReviews));
+        return reviewService.getAllReviews(member.get().getId());
     }
 
 }

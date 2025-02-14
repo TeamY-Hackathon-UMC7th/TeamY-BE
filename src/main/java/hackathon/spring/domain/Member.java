@@ -24,4 +24,5 @@ public class Member {
 
     @Column(nullable = false)
     private String password;
+
 }
