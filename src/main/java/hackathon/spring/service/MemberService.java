@@ -192,4 +192,48 @@ public class MemberService {
 
         return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "회원탈퇴 성공하였습니다.");
     }
+
+    @Transactional
+    public  ResponseEntity<ApiResponse<Object>> refresh() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        String token = authentication.getCredentials().toString();
+
+        Optional<Member> member = memberRepository.findByEmail(email);
+
+        if(member.isEmpty()){
+            return ResponseEntity
+                    .status(ErrorStatus._MEMBER_NOT_FOUND.getHttpStatus())
+                    .body(ApiResponse.onSuccess(
+                            ErrorStatus._MEMBER_NOT_FOUND.getCode(),
+                            ErrorStatus._MEMBER_NOT_FOUND.getMessage(),
+                            null));
+        }
+
+        String accessToken = jwtTokenProvider.generateAccessToken(member.get().getEmail());
+
+        // Set-Cookie 헤더로 토큰 저장
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)  // HTTPS 환경에서만
+                .path("/")
+                .maxAge(jwtTokenProvider.getAccessTokenExpiration() / 1000)
+                .build();
+
+        MemberDto.LoginResultDto response = MemberDto.LoginResultDto.builder()
+                .id(member.get().getId())
+                .email(member.get().getEmail())
+                .accessToken(accessToken)
+                .refreshToken(token)
+                .accessTokenExpiresIn(jwtTokenProvider.getAccessTokenExpiration())
+                .refreshTokenExpiresIn(jwtTokenProvider.getRefreshTokenExpiration())
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(ApiResponse.onSuccess(SuccessStatus._OK, response).getBody());
+    }
 }

@@ -68,4 +68,10 @@ public class MemberRestController {
     public ResponseEntity<ApiResponse> deleteMember() {
         return memberService.deleteMember();
     }
+
+    // 액세스토큰 재발급
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<Object>> refresh() {
+        return memberService.refresh();
+    }
 }
