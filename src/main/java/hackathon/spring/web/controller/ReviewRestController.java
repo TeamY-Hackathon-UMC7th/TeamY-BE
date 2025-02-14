@@ -72,8 +72,8 @@ public class ReviewRestController {
                 """
     )
     public ResponseEntity<ApiResponse<List<Review>>> getAllReviews( @RequestHeader("Authorization") String token){
-        String nickname = reviewService.extractNicknameFromToken(token);
-        Optional<Member> member = memberRepository.findByNickname(nickname);
+        String email= reviewService.extractEmailFromToken(token);
+        Optional<Member> member = memberRepository.findByEmail(email);
         List<Review> allReviews = reviewService.getAllReviews(member.get().getId());
 
         return ResponseEntity.ok(ApiResponse.onSuccess(allReviews));

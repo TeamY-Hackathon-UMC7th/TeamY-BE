@@ -43,8 +43,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _NEED_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN401", "로그인이 되지 않았습니다."),
 
     //커피 관련 응답
-    _COFFEE_NOT_FOUND(HttpStatus.NOT_FOUND, "COFFEE404", "존재하지 않는 커피입니다."),
-    _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다.");
+    _COFFEE_NOT_FOUND(HttpStatus.NOT_FOUND, "COFFEE404", "존재하지 않는 커피입니다.");
 
 
 

@@ -166,7 +166,7 @@ public class MemberService {
         if (jwtTokenProvider.validateToken(token)) {
             long expiration = jwtTokenProvider.getExpiration(token); // 토큰 만료 시간 가져오기
             jwtTokenProvider.addToBlacklist(token, expiration);
-            return ApiResponse.onSuccess(SuccessStatus._OK,"로그아웃 되었습니다.");
+            return ApiResponse.onSuccess(SuccessStatus._OK, Optional.of("로그아웃 되었습니다."));
         }
 
         throw new GeneralException(ErrorStatus._INVALID_TOKEN);
@@ -185,6 +185,6 @@ public class MemberService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         memberRepository.delete(member);
 
-        return ApiResponse.onSuccess(SuccessStatus._OK,"회원탈퇴 성공하였습니다.");
+        return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "회원탈퇴 성공하였습니다.");
     }
 }
