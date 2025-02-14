@@ -4,7 +4,11 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.service.CoffeeService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -54,10 +58,14 @@ public class CoffeeRestController {
         return coffeeService.recommendPopularCoffees();
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Coffee>> searchByKeyword(@RequestParam("keyword") String keyword) {
-        List<Coffee> coffees = coffeeService.searchByKeyword(keyword);
-        return ResponseEntity.ok(coffees);
+    @GetMapping("/search") // 검색
+    public ApiResponse<Page<Coffee>> searchByKeyword(@RequestParam("keyword") String keyword,
+                                                     @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page) {
+
+        Pageable pageable = PageRequest.of(page-1, 5);
+
+        Page<Coffee> coffees = coffeeService.searchByKeyword(keyword, pageable);
+        return ApiResponse.onSuccess(coffees);
     }
 
 

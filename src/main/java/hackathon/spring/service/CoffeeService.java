@@ -7,6 +7,8 @@ import hackathon.spring.domain.uuid.UuidRepository;
 import hackathon.spring.repository.CoffeeRepository;
 import hackathon.spring.s3.AmazonS3Manager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -90,8 +92,14 @@ public class CoffeeService {
     }
 
 
-    public List<Coffee> searchByKeyword(String keyword) {
-        return coffeeRepository.findByBrandOrNameContaining(keyword);
+    public Page<Coffee> searchByKeyword(String keyword, Pageable pageable) {
+        Page<Coffee> coffeeList = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
+
+        if (coffeeList.isEmpty()) {
+            throw new NoSuchElementException("검색하신 커피가 존재하지 않습니다.");
+        } else {
+            return coffeeList;
+        }
     }
 
 }
