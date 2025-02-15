@@ -12,6 +12,7 @@ public class JwtTokenProvider {
     public static String generateToken(String nickname) {
         return JWT.create()
                 .withSubject(nickname)
+//                .withClaim("memberId", memberId)
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(Algorithm.HMAC512(SECRET_KEY));
     }
