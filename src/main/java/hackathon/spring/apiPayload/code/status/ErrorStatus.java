@@ -17,12 +17,19 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","존재하지 않는 회원입니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
+    //로그인 관련 응답
+    _INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "LOGIN4001", "유효하지 않은 토큰입니다."),
+    _LOGOUT_TOKEN(HttpStatus.UNAUTHORIZED, "LOGIN4002", "로그아웃 처리된 토큰입니다."),
+
     //멤버 관련 응답
     _DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER409", "이미 사용 중인 닉네임입니다."),
+    _DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "MEMBER409", "이미 사용 중인 이메일입니다."),
     _EMPTY_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER400", "닉네임을 입력해야 합니다."),
     _NOT_LOGIN_USER(HttpStatus.BAD_REQUEST, "MEMBER401", "로그인을 먼저 진행해야 합니다."),
     _NOT_REGISTERED_USER(HttpStatus.BAD_REQUEST, "MEMBER402", "회원가입을 먼저 진행해야 합니다."),
 
+    _MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "사용자가 없습니다."),
+    _LOGIN_FAILED(HttpStatus.UNAUTHORIZED,"MEMBER401", "비밀번호가 틀렸습니다."),
 
     //리뷰 관련 응답
     _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다."),
