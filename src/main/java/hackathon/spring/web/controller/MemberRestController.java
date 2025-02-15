@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class MemberRestController {
     private final MemberService memberService;
@@ -31,7 +32,7 @@ public class MemberRestController {
 //    }
 
     // 회원가입
-    @PostMapping("/signup")
+    @PostMapping("/join")
     @Operation(
             summary = "회원가입 API",
             description = """
@@ -55,7 +56,7 @@ public class MemberRestController {
     }
 
     // 로그아웃
-    @PostMapping("members/logout")
+    @PostMapping("/logout")
     @Operation(
             summary = "로그아웃 API"
     )
@@ -76,7 +77,7 @@ public class MemberRestController {
     }
 
     // 액세스토큰 재발급
-    @PostMapping("/refresh")
+    @PostMapping("/reissue")
     @Operation(
             summary = "access 토큰 재발급 API",
             description = """
