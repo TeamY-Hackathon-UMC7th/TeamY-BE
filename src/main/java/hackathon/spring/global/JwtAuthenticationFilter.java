@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 토큰 없이 접근을 허용할 경로
         if (requestURI.startsWith("/swagger-ui") || requestURI.startsWith("/v3/api-docs")
-                || requestURI.startsWith("/check/") || requestURI.equals("/signup") || requestURI.equals("/login")) {
+                || requestURI.equals("/auth/join") || requestURI.equals("/auth/login")) {
             chain.doFilter(request, response);
             return;
         }
