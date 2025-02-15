@@ -1,6 +1,5 @@
 package hackathon.spring.web.dto;
 
-import hackathon.spring.domain.Coffee;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -8,14 +7,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoteResponseDTO {
+public class NoteDTO {
     /**
      * 전체 기록 조회 API의 응답 DTO
      * 사용 위치: GET /note

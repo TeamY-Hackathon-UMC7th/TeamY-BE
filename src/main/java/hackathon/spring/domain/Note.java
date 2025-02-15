@@ -45,6 +45,6 @@ public class Note extends BaseEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime sleepDate; // 수면 날짜 및 시간
 
-    @Column(length = 200, nullable = false)
-    private String review; // 리뷰
+    @Column(length = 200, nullable = true)
+    private String review; // 리뷰 안 써도 괜찮음
 }

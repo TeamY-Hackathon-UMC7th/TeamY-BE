@@ -2,14 +2,15 @@ package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
+import hackathon.spring.domain.Note;
 import hackathon.spring.service.NoteService;
-import hackathon.spring.web.dto.NoteResponseDTO;
+import hackathon.spring.web.dto.NoteDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,40 +20,47 @@ public class NoteRestController {
 
     private final NoteService noteService;
 
+    private Long extractMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
+        return noteService.getMemberIdByEmail(email); // 이메일을 기반으로 memberId 가져오기
+    }
+
     @GetMapping("")
     @Operation(summary = "전체 기록 조회 API", description = "사용자의 전체 기록 목록을 페이지네이션하여 조회합니다.")
-    public ResponseEntity<ApiResponse<NoteResponseDTO.GetAllNotesDTO>> getAllNotes(
-            @Parameter(description = "페이지 번호 (기본값: 0)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 크기 (기본값: 10)") @RequestParam(defaultValue = "10") int size) {
-        NoteResponseDTO.GetAllNotesDTO notes = noteService.getAllNotes(page, size);
-        return ResponseEntity.ok(ApiResponse.onSuccess(notes, SuccessStatus._OK.getMessage()));
+    public ResponseEntity<ApiResponse<NoteDTO.GetAllNotesDTO>> getAllNotes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Long memberId = extractMemberId();
+        return ResponseEntity.ok(ApiResponse.onSuccess(noteService.getAllNotes(memberId, page, size)));
     }
 
     @GetMapping("/{noteId}")
     @Operation(summary = "단일 기록 조회 API", description = "지정된 noteId에 대한 기록 정보를 조회합니다.")
-    public ResponseEntity<ApiResponse<NoteResponseDTO.NoteDTO>> getNote(
-            @Parameter(description = "조회할 기록의 ID") @PathVariable Long noteId) {
-        NoteResponseDTO.NoteDTO note = noteService.getNote(noteId);
-        return ResponseEntity.ok(ApiResponse.onSuccess(note, SuccessStatus._OK.getMessage()));
+    public ResponseEntity<ApiResponse<NoteDTO.NoteDTO>> getNote(
+            @PathVariable Long noteId) {
+        Long memberId = extractMemberId();
+        return ResponseEntity.ok(ApiResponse.onSuccess(noteService.getNote(memberId, noteId)));
     }
 
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("")
-    @Operation(summary = "기록 생성 API", description = "새로운 기록을 생성합니다. 인증이 필요합니다.")
-    public ResponseEntity<ApiResponse<String>> createNote(
-            @Parameter(description = "액세스 토큰") @RequestHeader("Authorization") String token,
-            @RequestBody @Valid NoteResponseDTO.NewNoteDTO noteRequestDTO) {
-//        String nickname = noteService.extractNicknameFromToken(token);
-        return ResponseEntity.ok(noteService.createNote(noteRequestDTO, memberId));
+    @Operation(summary = "기록 생성 API", description = "새로운 기록을 생성합니다.")
+    public ResponseEntity<ApiResponse<Note>> createNote(
+            @RequestBody @Valid NoteDTO.NewNoteDTO noteRequestDTO) {
+        Long memberId = extractMemberId();
+        return ResponseEntity.ok(ApiResponse.onSuccess(noteService.createNote(noteRequestDTO, memberId)));
     }
 
-    @PreAuthorize("isAuthenticated()")
+
     @DeleteMapping("/{noteId}")
-    @Operation(summary = "기록 삭제 API", description = "지정된 noteId의 기록을 삭제합니다. 인증이 필요합니다.")
+    @Operation(summary = "기록 삭제 API", description = "지정된 noteId의 기록을 삭제합니다.")
     public ResponseEntity<ApiResponse<String>> deleteNote(
-            @Parameter(description = "액세스 토큰") @RequestHeader("Authorization") String token,
-            @Parameter(description = "삭제할 기록의 ID") @PathVariable Long noteId) {
-        String nickname = noteService.extractNicknameFromToken(token);
-        return ResponseEntity.ok(noteService.deleteNote(noteId, nickname));
+            @PathVariable Long noteId) {
+        Long memberId = extractMemberId();
+        return ResponseEntity.ok(ApiResponse.onSuccess(noteService.deleteNote(memberId, noteId)));
     }
+
+
+
+
 }
