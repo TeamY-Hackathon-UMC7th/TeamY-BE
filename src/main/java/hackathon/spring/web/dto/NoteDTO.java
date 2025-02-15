@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Builder
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class NoteDTO {
     /**
      * 전체 기록 조회 API의 응답 DTO
@@ -66,7 +63,7 @@ public class NoteDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NoteDTO {
+    public static class NoteDto {
         private CoffeePreviewDTO coffee;
         private String writeDate;
         private String drinkDate;

@@ -8,8 +8,8 @@ import hackathon.spring.web.dto.NoteDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +37,7 @@ public class NoteRestController {
 
     @GetMapping("/{noteId}")
     @Operation(summary = "단일 기록 조회 API", description = "지정된 noteId에 대한 기록 정보를 조회합니다.")
-    public ResponseEntity<ApiResponse<NoteDTO.NoteDTO>> getNote(
+    public ResponseEntity<ApiResponse<NoteDTO.NoteDto>> getNote(
             @PathVariable Long noteId) {
         Long memberId = extractMemberId();
         return ResponseEntity.ok(ApiResponse.onSuccess(noteService.getNote(memberId, noteId)));

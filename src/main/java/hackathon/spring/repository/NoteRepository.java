@@ -5,9 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
-import java.util.Optional;
 
 public interface NoteRepository extends JpaRepository<Note, Long> {
     @EntityGraph(attributePaths = {"coffee"}) // 한 번의 쿼리로 Note + Coffee 조회
