@@ -1,5 +1,6 @@
 package hackathon.spring.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,13 @@ import lombok.*;
 @AllArgsConstructor
 public class Member {
 
+
     @Id
-    @Column(nullable = false, unique = true) // 닉네임은 UNIQUE
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
     private String nickname;
+
+
 }

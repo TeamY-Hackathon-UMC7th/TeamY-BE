@@ -1,16 +1,18 @@
 package hackathon.spring.web.dto;
 
+import hackathon.spring.domain.Coffee;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TimeRequestDto {
-    private String userTimeInput;
+public class CoffeeDto {
+    private List<Coffee> coffees;
+
 }
