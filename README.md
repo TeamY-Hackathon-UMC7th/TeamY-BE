@@ -111,18 +111,6 @@ C(t) = C₀ × (1/2)^(t/T)
 - `C₀`: 초기 카페인 농도 (mg)
 - `T`: 카페인의 반감기 (시간)
 - `t`: 경과 시간 (시간)
-
----
-
-### 음료 업로드 예시 (S3 연동)
-
-```java
-String bucketName = amazonConfig.getBucket();
-String keyName = generateKeyName(uuid);
-s3Client.putObject(bucketName, keyName, fileInputStream, metadata);
-```
-- AWS S3를 활용하여 음료 이미지를 저장하며, UUID를 사용하여 KeyName을 생성합니다.
-
 ---
 
 ## 🌟 프로젝트 배경 및 아이디어
