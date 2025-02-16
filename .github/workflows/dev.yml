@@ -1,38 +1,51 @@
-name: CI/CD for TeamY-BE App
+name: CI/CD for Spring Boot App
 
 on:
   push:
     branches:
-      - main  # 'deploy' 브랜치에 push될 때 실행
+      - main
 
 jobs:
   docker:
     runs-on: ubuntu-latest
 
     steps:
-    # ✅ 레포지토리 체크아웃
+    # Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # ✅ Docker Hub 로그인
+#    - name: Set up JDK 21
+#      uses: actions/setup-java@v3
+#      with:
+#        java-version: '21' # 스프링부트 애플리케이션 자바 버전에 맞게
+#        distribution: 'zulu'
+
+    - name: make application.yml
+      run: |
+        mkdir ./src/main/resources # 원격에 resources 폴더가 올라가 있다면 이 줄 삭제
+        cd ./src/main/resources
+        touch ./application.yml
+        echo "${{ secrets.APPLICATION }}" > ./application.yml
+
+    # Log in to Docker Hub
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    # ✅ Docker Buildx 설정
+    # Set up Docker Buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    # ✅ Docker 이미지 빌드 및 푸시
+    # Build and push Docker image
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
-        context: .  # Dockerfile이 있는 디렉토리
+        context: . # Dockerfile이 있는 디렉토리
         file: ./Dockerfile  # Dockerfile 경로 지정
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/lastcoffee:latest  # 이미지 이름 변경
+        tags: ${{ secrets.DOCKERHUB_REPO }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,21 +60,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         envs: GITHUB_SHA
         script: |
-          # ✅ 기존 컨테이너 정리
           sudo docker ps -qa | xargs -r sudo docker rm -f
-          
-          # ✅ 최신 Docker 이미지 가져오기
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/lastcoffee:latest
-          
-          # ✅ 새로운 컨테이너 실행 (컨테이너 이름: lastcoffee)
-          sudo docker run -d --name lastcoffee -p 8080:8080 \
-          -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-          -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-          -e DB_URL=${{ secrets.DB_URL }} \
-          -e DB_USER=${{ secrets.DB_USER }} \
-          -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-          -e SECRET_KEY=${{ secrets.SECRET_KEY }} \
-          ${{ secrets.DOCKERHUB_USERNAME }}/lastcoffee:latest
-          
-          # ✅ 사용하지 않는 Docker 이미지 정리
+          sudo docker pull ${{ secrets.DOCKERHUB_REPO }}:latest
+          sudo docker run -d -p 8080:8080 ${{ secrets.DOCKER_REPO }}:latest
           sudo docker image prune -f
