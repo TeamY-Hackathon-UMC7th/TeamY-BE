@@ -1,9 +1,12 @@
 package hackathon.spring.global;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.apiPayload.exception.GeneralException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
@@ -14,6 +17,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -32,24 +37,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = jwtTokenProvider.resolveToken(request);
+        try {
+            String token = jwtTokenProvider.resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            if (jwtTokenProvider.isBlacklisted(token)) {
-                System.out.println("🚨 블랙리스트 토큰 감지: " + token);
-                throw new GeneralException(ErrorStatus._LOGOUT_TOKEN);
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                if (jwtTokenProvider.isBlacklisted(token)) {
+                    log.error("❌ [JwtAuthenticationFilter] 블랙리스트 요청 → 401 반환");
+                    handleAuthenticationError(response, "접근할 수 없는 사용자입니다.");
+                    return;
+                }
+                Authentication auth = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                System.out.println("✅ 인증 완료: " + auth.getName());
+            } else {
+                System.out.println("🚨 유효하지 않은 토큰으로 접근 시도: " + token);
+                handleAuthenticationError(response, "로그인이 필요한 서비스입니다.");
+                return;
             }
 
-            Authentication auth = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            System.out.println("✅ 인증 완료: " + auth.getName());
+            chain.doFilter(request, response);
+        } catch (Exception e) {
+            System.out.println("🚨 필터 예외 발생: " + e.getMessage());
+            throw new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR);
         }
-        else {
-            System.out.println("🚨 유효하지 않은 토큰으로 접근 시도: " + token);
-            chain.doFilter(request, response); // 🚀 예외 발생 없이 요청 진행
-            return;
-        }
+    }
 
-        chain.doFilter(request, response);
+    private void handleAuthenticationError(HttpServletResponse response, String message) throws IOException {
+        log.error("🚨 [JwtAuthenticationFilter] 인증 실패: {}", message);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(
+                new ObjectMapper().writeValueAsString(
+                        ApiResponse.onFailure("AUTH4001", message, null)
+                )
+        );
     }
 }

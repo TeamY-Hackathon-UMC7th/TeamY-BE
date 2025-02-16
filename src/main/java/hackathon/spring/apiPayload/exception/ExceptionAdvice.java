@@ -26,6 +26,22 @@ import java.util.Optional;
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
+    //generalException 핸들 코드 추가
+    @ExceptionHandler(GeneralException.class)
+    public ResponseEntity<ApiResponse<Object>> handleGeneralException(GeneralException ex) {
+        ErrorReasonDTO errorReasonHttpStatus = ex.getErrorReasonHttpStatus();
+
+        System.out.println("🚨 예외 발생: " + errorReasonHttpStatus.getMessage());
+
+        return ResponseEntity
+                .status(errorReasonHttpStatus.getHttpStatus()) // 실제 예외 상태 코드 반환
+                .body(ApiResponse.onFailure(
+                        errorReasonHttpStatus.getCode(),
+                        errorReasonHttpStatus.getMessage(),
+                        null)); // 실패 응답
+    }
+
+
 
     @ExceptionHandler
     public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
@@ -59,11 +75,6 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(),request, e.getMessage());
     }
 
-    @ExceptionHandler(value = GeneralException.class)
-    public ResponseEntity onThrowException(GeneralException generalException, HttpServletRequest request) {
-        ErrorReasonDTO errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
-        return handleExceptionInternal(generalException,errorReasonHttpStatus,null,request);
-    }
 
     private ResponseEntity<Object> handleExceptionInternal(Exception e, ErrorReasonDTO reason,
                                                            HttpHeaders headers, HttpServletRequest request) {
