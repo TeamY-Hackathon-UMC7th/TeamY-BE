@@ -5,6 +5,7 @@ import hackathon.spring.apiPayload.exception.CoffeeServiceException;
 import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
+import hackathon.spring.convertor.CoffeeConverter;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.domain.uuid.Uuid;
@@ -37,6 +38,7 @@ public class CoffeeService {
     private final CoffeeRepository coffeeRepository;
 //    private final AmazonS3Manager s3Manager;
     private final UuidRepository uuidRepository;
+    private final CoffeeConverter coffeeConverter;
 
 //    public Coffee addCoffee(String name, Brand brand,Integer sugar, Integer caffeine, Integer calories, Integer protein, MultipartFile coffeeImg) {
 //        // UUID 생성 및 저장
@@ -137,12 +139,17 @@ public class CoffeeService {
     }
 
 
-    public Page<Coffee> searchByKeyword(String keyword, Pageable pageable) {
+    public Page<CoffeeDto.CoffeeResponseDto> searchByKeyword(String keyword, Pageable pageable) {
         Page<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
 
         if (coffees == null || coffees.isEmpty()) {
             throw new CoffeeServiceException(ErrorStatus._COFFEE_NOT_FOUND);
         }
-        return coffees;
+
+        List<CoffeeDto.CoffeeResponseDto> coffeeResponseDtos = coffees.stream()
+                .map(coffeeConverter::toCoffeeDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(coffeeResponseDtos, pageable, coffees.getTotalElements());
     }
 }
