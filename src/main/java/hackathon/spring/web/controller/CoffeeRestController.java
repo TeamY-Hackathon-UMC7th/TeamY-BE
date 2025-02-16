@@ -4,6 +4,7 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.service.CoffeeService;
+import io.swagger.v3.oas.annotations.Parameter;
 import hackathon.spring.web.dto.CoffeeDto;
 import hackathon.spring.web.dto.MemberDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -72,20 +76,19 @@ public class CoffeeRestController {
         return coffeeService.recommendPopularCoffees();
     }
 
-    @GetMapping("/search")
+    @GetMapping("/search") // 검색
     @Operation(
             summary = "음료 검색 API",
             description = """
              브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노
                 """
     )
-    public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(@RequestParam("keyword") String keyword) {
-        return coffeeService.searchByKeyword(keyword);
+    public ApiResponse<Page<Coffee>> searchByKeyword(@RequestParam("keyword") String keyword,
+                                                     @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page) {
+
+        Pageable pageable = PageRequest.of(page - 1, 5);
+
+        Page<Coffee> coffees = coffeeService.searchByKeyword(keyword, pageable);
+        return ApiResponse.onSuccess(coffees);
     }
-
-
-
-
-
-
 }
