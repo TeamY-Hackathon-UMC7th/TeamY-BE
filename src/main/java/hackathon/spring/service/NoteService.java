@@ -16,7 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,6 +45,12 @@ public class NoteService {
 //        }
 //    }
 
+    public Long getMemberIdByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .map(Member::getId)  // Member 객체에서 ID 추출
+                .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
+    }
+
     @Transactional
     public Note createNote(NoteDTO.NewNoteDTO dto, Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -72,7 +78,7 @@ public class NoteService {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
 
-        if (!note.getMember().getId().equals(memberId)) {
+        if (note.getMember().getId()!=memberId) {
             throw new GeneralException(ErrorStatus._UNAUTHORIZED); // 권한 없음 예외
         }
 
@@ -112,15 +118,15 @@ public class NoteService {
     }
 
     @Transactional(readOnly = true)
-    public NoteDTO.NoteDTO getNote(Long memberId, Long noteId) {
+    public NoteDTO.NoteDto getNote(Long memberId, Long noteId) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
 
-        if (!note.getMember().getId().equals(memberId)) {
+        if (note.getMember().getId()!=memberId) {
             throw new GeneralException(ErrorStatus._UNAUTHORIZED);
         }
 
-        return new NoteDTO.NoteDTO(
+        return new NoteDTO.NoteDto(
                 new NoteDTO.CoffeePreviewDTO(
                         note.getCoffee().getBrand().name(),
                         note.getCoffee().getName(),
