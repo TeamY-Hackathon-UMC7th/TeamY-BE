@@ -49,3 +49,10 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+# JWT 설정 추가
+custom:
+  jwt:
+    secretKey: 8AJc6kC1DGeVjM4CHnWLlu8IYhAuaAOdmqonO7obud4=
+    access-token-validity-in-seconds: 3600    # Access Token 1시간
+    refresh-token-validity-in-seconds: 604800 # Refresh Token 1주일
