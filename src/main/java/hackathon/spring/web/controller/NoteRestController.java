@@ -1,7 +1,6 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
-import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.domain.Note;
 import hackathon.spring.service.NoteService;
 import hackathon.spring.web.dto.NoteDTO;
