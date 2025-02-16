@@ -8,4 +8,4 @@ RUN ./gradlew clean build -x test
 FROM openjdk:21-jdk
 #debian기반
 COPY --from=builder /usr/src/build/libs/TeamY-BE-0.0.1-SNAPSHOT.jar /usr/app/app.jar
-ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "-Duser.timezone=Asia/Seoul", "/usr/app/app.jar"]

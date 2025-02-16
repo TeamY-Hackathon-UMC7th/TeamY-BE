@@ -6,6 +6,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 
+@Slf4j
 @Component
 @Getter
 @RequiredArgsConstructor
@@ -26,12 +28,13 @@ public class JwtTokenProvider {
 
     private final StringRedisTemplate redisTemplate;
 
-    private final String SECRET_KEY = "${SECRET_KEY}";
+    @Value("${custom.jwt.secretKey}")  // application.yml에서 값 주입
+    private String SECRET_KEY;
 
-    @Value("${access-token-expiration}")
+    @Value("${custom.jwt.access-token-validity-in-seconds}")
     private long accessTokenExpiration;
 
-    @Value("${refresh-token-expiration}")
+    @Value("${custom.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
     public String generateAccessToken(String email) {
