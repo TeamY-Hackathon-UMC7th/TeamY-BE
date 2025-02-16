@@ -1,0 +1,25 @@
+#version: '3.8'  # docker-compose 파일 버전
+#
+#services:
+#  lastcoffee: # Spring Boot 서비스 이름 (컨테이너 이름도 동일)
+#    build:
+#      context: .       # Dockerfile이 있는 디렉토리 (현재 디렉토리)
+#    image: lastcoffee   # 생성될 Docker 이미지 이름
+#    container_name: lastcoffee   # 컨테이너 이름 변경
+#    restart: always  # 컨테이너 재시작 정책
+#    ports:
+#      - "8080:8080" # 애플리케이션 포트 매핑
+#    environment:
+#      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+#      DB_PASSWORD: ${DB_PASSWORD}
+#      DB_URL: ${DB_URL}
+#      DB_USER: ${DB_USER}
+#      SECRET_KEY: ${SECRET_KEY}
+#
+#volumes:
+#  db_data:
+#
+#networks:
+#  default:
+#    driver: bridge

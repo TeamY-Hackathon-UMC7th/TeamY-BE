@@ -40,3 +40,11 @@ out/
 ._.DS_Store
 **/.DS_Store
 **/._.DS_Store
+
+### application.yml ###
+src/main/resources/application.yml
+./application.yml
+# 프로젝트 내 모든 application.yml 무시
+**/application.yml
+
+

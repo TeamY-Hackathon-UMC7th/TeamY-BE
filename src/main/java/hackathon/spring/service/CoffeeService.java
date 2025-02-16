@@ -1,14 +1,22 @@
 package hackathon.spring.service;
 
+import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.exception.CoffeeServiceException;
+import hackathon.spring.apiPayload.exception.GeneralException;
+import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.domain.uuid.Uuid;
 import hackathon.spring.domain.uuid.UuidRepository;
 import hackathon.spring.repository.CoffeeRepository;
-import hackathon.spring.s3.AmazonS3Manager;
+//import hackathon.spring.s3.AmazonS3Manager;
+import hackathon.spring.web.dto.CoffeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,36 +35,55 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = false)
 public class CoffeeService {
     private final CoffeeRepository coffeeRepository;
-    private final AmazonS3Manager s3Manager;
+//    private final AmazonS3Manager s3Manager;
     private final UuidRepository uuidRepository;
 
-    public Coffee addCoffee(String name, Brand brand,Integer sugar, Integer caffeine, Integer calories, Integer protein, MultipartFile coffeeImg) {
-        // UUID 생성 및 저장
-        String uuid = UUID.randomUUID().toString();
-        Uuid savedUuid = uuidRepository.save(Uuid.builder()
-                .uuid(uuid).build());
+//    public Coffee addCoffee(String name, Brand brand,Integer sugar, Integer caffeine, Integer calories, Integer protein, MultipartFile coffeeImg) {
+//        // UUID 생성 및 저장
+//        String uuid = UUID.randomUUID().toString();
+//        Uuid savedUuid = uuidRepository.save(Uuid.builder()
+//                .uuid(uuid).build());
+//
+//        // 이미지 업로드
+//        String imageKey = s3Manager.generateKeyName(savedUuid); // 커피 이미지에 적합한 KeyName 생성
+//        String imageUrl = s3Manager.uploadFile(imageKey, coffeeImg);
+//
+//        // Coffee 객체 생성
+//        Coffee newCoffee = Coffee.builder()
+//                .name(name)
+//                .brand(brand)
+//                .sugar(sugar)
+//                .caffeine(caffeine)
+//                .calories(calories)
+//                .protein(protein)
+//                .coffeeImgUrl(imageUrl) // 이미지 URL 설정
+//                .build();
+//
+//        // Coffee 객체 저장
+//        return coffeeRepository.save(newCoffee);
+//    }
 
-        // 이미지 업로드
-        String imageKey = s3Manager.generateKeyName(savedUuid); // 커피 이미지에 적합한 KeyName 생성
-        String imageUrl = s3Manager.uploadFile(imageKey, coffeeImg);
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendByCaffeineLimit(Integer userHourInput) {
+        if (userHourInput == null) {
+            throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
+        }
 
-        // Coffee 객체 생성
-        Coffee newCoffee = Coffee.builder()
-                .name(name)
-                .brand(brand)
-                .sugar(sugar)
-                .caffeine(caffeine)
-                .calories(calories)
-                .protein(protein)
-                .coffeeImgUrl(imageUrl) // 이미지 URL 설정
-                .build();
+        try {
+            if (userHourInput < 0 || userHourInput > 23) {
+                throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+            }
+        } catch (NumberFormatException e) {
+            throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+        }
 
-        // Coffee 객체 저장
-        return coffeeRepository.save(newCoffee);
-    }
+        int currentHour = LocalDateTime.now().getHour();
 
-    public List<Coffee> recommendByCaffeineLimit(LocalDateTime userTimeInput) {
-        long t = ChronoUnit.MINUTES.between(LocalDateTime.now(), userTimeInput);
+        long t;
+        if (userHourInput <= currentHour) {
+            t = ((userHourInput + 24) - currentHour) * 60; // 하루를 더해서 계산
+        } else {
+            t = (userHourInput - currentHour) * 60; // 같은 날 시간 계산
+        }
 
         int minCaffeine = 0;
         int maxCaffeine = 0;
@@ -75,31 +102,47 @@ public class CoffeeService {
 
         List<Coffee> coffeeList = coffeeRepository.findByCaffeineBetweenOrderByCaffeineAsc(minCaffeine, maxCaffeine);
         Collections.shuffle(coffeeList);  // 리스트를 무작위로 섞기
-        return coffeeList.stream()
-                .limit(5)         // 상위 5개만 반환
+
+        // 상위 5개의 커피를 추천
+        List<Coffee> recommendedCoffees = coffeeList.stream()
+                .limit(5)
                 .collect(Collectors.toList());
+
+        // CoffeeDto로 감싸기
+        CoffeeDto coffeeDto = new CoffeeDto(recommendedCoffees);
+
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
     }
 
-    public List<Coffee> recommendPopularCoffees(){
+    public ResponseEntity<ApiResponse<CoffeeDto>> recommendPopularCoffees(){
         List<Coffee> allCoffees = coffeeRepository.findAll();
         if (allCoffees.isEmpty()) {
             throw new NoSuchElementException("커피 데이터가 존재하지 않습니다.");
         }
+
+        // 커피 리스트를 랜덤으로 섞기
         Collections.shuffle(allCoffees);
-        return allCoffees.stream()
+
+        // 상위 5개의 커피를 추천
+        List<Coffee> recommendedCoffees = allCoffees.stream()
                 .limit(5)
                 .collect(Collectors.toList());
+
+        // CoffeeDto로 감싸기
+        CoffeeDto coffeeDto = new CoffeeDto(recommendedCoffees);
+
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
     }
 
 
     public Page<Coffee> searchByKeyword(String keyword, Pageable pageable) {
-        Page<Coffee> coffeeList = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
+        Page<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
 
-        if (coffeeList.isEmpty()) {
-            throw new NoSuchElementException("검색하신 커피가 존재하지 않습니다.");
-        } else {
-            return coffeeList;
+        if (coffees == null || coffees.isEmpty()) {
+            throw new CoffeeServiceException(ErrorStatus._COFFEE_NOT_FOUND);
         }
+        return coffees;
     }
-
 }
