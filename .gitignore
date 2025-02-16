@@ -43,6 +43,8 @@ out/
 
 ### application.yml ###
 src/main/resources/application.yml
-resources/application.yml
 ./application.yml
+# 프로젝트 내 모든 application.yml 무시
+**/application.yml
+
 
