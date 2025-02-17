@@ -3,7 +3,7 @@ package hackathon.spring.web.controller;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Note;
 import hackathon.spring.service.NoteService;
-import hackathon.spring.web.dto.NoteDTO;
+import hackathon.spring.web.dto.NoteDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class NoteRestController {
 
     @GetMapping("")
     @Operation(summary = "전체 기록 조회 API", description = "사용자의 전체 기록 목록을 페이지네이션하여 조회합니다.")
-    public ResponseEntity<ApiResponse<NoteDTO.GetAllNotesDTO>> getAllNotes(
+    public ResponseEntity<ApiResponse<NoteDto.GetAllNotesDTO>> getAllNotes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Long memberId = extractMemberId();
@@ -36,7 +36,7 @@ public class NoteRestController {
 
     @GetMapping("/{noteId}")
     @Operation(summary = "단일 기록 조회 API", description = "지정된 noteId에 대한 기록 정보를 조회합니다.")
-    public ResponseEntity<ApiResponse<NoteDTO.NoteDto>> getNote(
+    public ResponseEntity<ApiResponse<NoteDto.NoteDTO>> getNote(
             @PathVariable Long noteId) {
         Long memberId = extractMemberId();
         return ResponseEntity.ok(ApiResponse.onSuccess(noteService.getNote(memberId, noteId)));
@@ -45,7 +45,7 @@ public class NoteRestController {
     @PostMapping("")
     @Operation(summary = "기록 생성 API", description = "새로운 기록을 생성합니다.")
     public ResponseEntity<ApiResponse<Note>> createNote(
-            @RequestBody @Valid NoteDTO.NewNoteDTO noteRequestDTO) {
+            @RequestBody @Valid NoteDto.NewNoteDTO noteRequestDTO) {
         Long memberId = extractMemberId();
         return ResponseEntity.ok(ApiResponse.onSuccess(noteService.createNote(noteRequestDTO, memberId)));
     }

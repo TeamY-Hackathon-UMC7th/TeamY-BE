@@ -9,7 +9,8 @@ import hackathon.spring.domain.Note;
 import hackathon.spring.repository.CoffeeRepository;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.repository.NoteRepository;
-import hackathon.spring.web.dto.NoteDTO;
+import hackathon.spring.web.dto.CoffeeDto;
+import hackathon.spring.web.dto.NoteDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,7 +53,7 @@ public class NoteService {
     }
 
     @Transactional
-    public Note createNote(NoteDTO.NewNoteDTO dto, Long memberId) {
+    public Note createNote(NoteDto.NewNoteDTO dto, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_REGISTERED_USER));
 
@@ -68,6 +69,7 @@ public class NoteService {
                 .build();
 
         noteRepository.save(note);
+        coffee.setDrinkCount(coffee.getDrinkCount() + 1);
 
         // ✅ NoteDTO 인스턴스를 생성하여 반환
         return note;
@@ -87,7 +89,7 @@ public class NoteService {
     }
 
     @Transactional(readOnly = true)
-    public NoteDTO.GetAllNotesDTO getAllNotes(Long memberId, int page, int size) {
+    public NoteDto.GetAllNotesDTO getAllNotes(Long memberId, int page, int size) {
         Pageable pageable = (Pageable) PageRequest.of(page, size);
         Page<Note> notesPage = noteRepository.findByMemberId(memberId, pageable);
 
@@ -95,10 +97,10 @@ public class NoteService {
         if (notes.isEmpty()) {
             throw new NoteHandler(ErrorStatus._REVIEW_NOT_FOUND);
         }
-        List<NoteDTO.NotePreviewDTO> notePreviews = notes.stream()
-                .map(note -> new NoteDTO.NotePreviewDTO(
+        List<NoteDto.NotePreviewDTO> notePreviews = notes.stream()
+                .map(note -> new NoteDto.NotePreviewDTO(
                         note.getId(),
-                        new NoteDTO.CoffeePreviewDTO(
+                        new CoffeeDto.CoffeePreviewDTO(
                                 note.getCoffee().getBrand().name(),
                                 note.getCoffee().getName(),
                                 note.getCoffee().getCoffeeImgUrl()
@@ -110,7 +112,7 @@ public class NoteService {
                 .collect(Collectors.toList());
 
         // ✅ 페이지 정보 포함하여 DTO 생성
-        return new NoteDTO.GetAllNotesDTO(
+        return new NoteDto.GetAllNotesDTO(
                 page,
                 notesPage.getTotalPages(),
                 notePreviews
@@ -118,7 +120,7 @@ public class NoteService {
     }
 
     @Transactional(readOnly = true)
-    public NoteDTO.NoteDto getNote(Long memberId, Long noteId) {
+    public NoteDto.NoteDTO getNote(Long memberId, Long noteId) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
 
@@ -126,8 +128,8 @@ public class NoteService {
             throw new GeneralException(ErrorStatus._UNAUTHORIZED);
         }
 
-        return new NoteDTO.NoteDto(
-                new NoteDTO.CoffeePreviewDTO(
+        return new NoteDto.NoteDTO(
+                new CoffeeDto.CoffeePreviewDTO(
                         note.getCoffee().getBrand().name(),
                         note.getCoffee().getName(),
                         note.getCoffee().getCoffeeImgUrl()

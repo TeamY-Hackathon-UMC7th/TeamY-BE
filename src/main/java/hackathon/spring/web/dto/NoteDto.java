@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 
-public class NoteDTO {
+public class NoteDto {
     /**
      * 전체 기록 조회 API의 응답 DTO
      * 사용 위치: GET /note
@@ -35,25 +35,12 @@ public class NoteDTO {
     @Builder
     public static class NotePreviewDTO {
         private Long noteId;
-        private CoffeePreviewDTO coffee;
+        private CoffeeDto.CoffeePreviewDTO coffee;
         private String writeDate;
         private int drinkHour;
         private int sleepHour;
     }
 
-    /**
-     * 커피 정보를 표현하는 DTO
-     * 사용 위치: NotePreviewDTO, NoteDTO 내부
-     */
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class CoffeePreviewDTO {
-        private String coffeeBrand;
-        private String coffeeName;
-        private String coffeeImageURL;
-    }
 
     /**
      * 단일 기록 조회 API의 응답 DTO
@@ -63,8 +50,8 @@ public class NoteDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NoteDto {
-        private CoffeePreviewDTO coffee;
+    public static class NoteDTO {
+        private CoffeeDto.CoffeePreviewDTO coffee;
         private String writeDate;
         private String drinkDate;
         private String sleepDate;
