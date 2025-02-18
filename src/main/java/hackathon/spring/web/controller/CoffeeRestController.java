@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +38,12 @@ import java.util.List;
 @RequestMapping("/coffee")
 public class CoffeeRestController {
     private final CoffeeService coffeeService;
+
+    private String extractMemberEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
+        return email; // 이메일을가져오기
+    }
 
 
 //    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //새로운 음료 등록
@@ -61,19 +69,20 @@ public class CoffeeRestController {
                 - 요청 본문에는 userTimeInput, 즉 사용자가 자고싶은 시간이 포함되어야 합니다.
                 """
     )
-    public ResponseEntity<ApiResponse<CoffeeDto>> recommendCoffees(@RequestParam("time") @Max(24)Integer time) {
-        return coffeeService.recommendByCaffeineLimit(time);
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> recommendCoffees(@RequestParam("time") @Max(24)Integer time) {
+        String email = extractMemberEmail();
+        return coffeeService.recommendByCaffeineLimit(email, time);
     }
 
     @GetMapping("/popular")
     @Operation(
             summary = "인기메뉴 추천 API",
             description = """
-              랜덤으로 인기 있는 음료 5개를 추천해주는 API입니다.
+              사람들이 많이 기록한 인기 있는 음료 5개를 추천해주는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse<CoffeeDto>> getPopularCoffees() {
-        return coffeeService.recommendPopularCoffees();
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeeDetailPreviewDTO>>> getPopularCoffees() {
+        return coffeeService.getPopularCoffees();
     }
 
     @GetMapping("/search") // 검색
@@ -83,6 +92,23 @@ public class CoffeeRestController {
              브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노
                 """
     )
+    public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(@RequestParam("keyword") String keyword) {
+        return coffeeService.searchByKeyword(keyword);
+    }
+
+    @GetMapping("/recent")
+    @Operation(
+            summary = "최근 추천받음 음료 API",
+            description = """
+             최근 추천받음 음료를 보여주는 API입니다.
+                """
+    )
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees() {
+        String email = extractMemberEmail();
+        return coffeeService.get5RecentRecommendedCoffees(email);
+    }
+
+
     public ApiResponse<Page<Coffee>> searchByKeyword(@RequestParam("keyword") String keyword,
                                                      @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page) {
 
