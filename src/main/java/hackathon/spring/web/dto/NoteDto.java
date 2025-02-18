@@ -1,5 +1,6 @@
 package hackathon.spring.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 
-public class NoteDTO {
+public class NoteDto {
     /**
      * 전체 기록 조회 API의 응답 DTO
      * 사용 위치: GET /note
@@ -35,25 +36,12 @@ public class NoteDTO {
     @Builder
     public static class NotePreviewDTO {
         private Long noteId;
-        private CoffeePreviewDTO coffee;
+        private CoffeeDto.CoffeePreviewDTO coffee;
         private String writeDate;
         private int drinkHour;
         private int sleepHour;
     }
 
-    /**
-     * 커피 정보를 표현하는 DTO
-     * 사용 위치: NotePreviewDTO, NoteDTO 내부
-     */
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class CoffeePreviewDTO {
-        private String coffeeBrand;
-        private String coffeeName;
-        private String coffeeImageURL;
-    }
 
     /**
      * 단일 기록 조회 API의 응답 DTO
@@ -63,8 +51,8 @@ public class NoteDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NoteDto {
-        private CoffeePreviewDTO coffee;
+    public static class NoteDTO {
+        private CoffeeDto.CoffeePreviewDTO coffee;
         private String writeDate;
         private String drinkDate;
         private String sleepDate;
@@ -81,14 +69,29 @@ public class NoteDTO {
     @AllArgsConstructor
     @Builder
     public static class NewNoteDTO {
-        @NotNull(message = "coffeeId는 필수 입력값입니다.")
-        private Long coffeeId;
-        @NotNull(message = "drinkDate는 필수 입력값입니다.")
+        @Schema(example = "2025-02-17", description = "YYYY-MM-DD 형식의 작성 날짜")
+        private String writeDate;
+
+        @Schema(example = "2025-02-17", description = "YYYY-MM-DD 형식의 마신 날짜")
         private String drinkDate;
-        @NotNull(message = "sleepDate는 필수 입력값입니다.")
+
+        @Schema(example = "13", description = "마신 시간 (HH)")
+        private String drinkHour;
+
+        @Schema(example = "30", description = "마신 분 (mm)")
+        private String drinkMinute;
+
+        @Schema(example = "2025-02-17", description = "YYYY-MM-DD 형식의 수면 날짜")
         private String sleepDate;
-        @Size(max = 200, message = "리뷰는 최대 200자까지 가능합니다.")
+
+        @Schema(example = "23", description = "수면 시간 (HH)")
+        private String sleepHour;
+
+        @Schema(example = "45", description = "수면 분 (mm)")
+        private String sleepMinute;
+
         private String review;
+        private Long coffeeId;
     }
 
 
