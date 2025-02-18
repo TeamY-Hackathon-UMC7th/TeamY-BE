@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Table(name = "coffee")
 @Setter
 @Getter
 @Builder
@@ -24,22 +25,22 @@ public class Coffee {
     @Column(nullable = false)
     private Brand brand;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private Integer sugar;
 
     @Column(nullable = false)
     private Integer caffeine;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private Integer calories;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private Integer protein;
 
-    @Column(nullable = false)
-    private String coffeeImgUrl; // 이미지 URL도 NOT NULL
+    @Column(nullable = true)
+    private String coffeeImgUrl;
 
-    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "drink_count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer drinkCount; // 사람들이 많이 마신 횟수 (초기값 0)
 
 }

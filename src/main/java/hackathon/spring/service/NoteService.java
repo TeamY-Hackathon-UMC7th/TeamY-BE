@@ -18,7 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,21 +34,6 @@ public class NoteService {
     private final MemberRepository memberRepository;
     private final CoffeeRepository coffeeRepository;
 
-//    public Long extractMemberIdFromToken(String token) {
-//        if (token == null || !token.startsWith("Bearer ")) {
-//            throw new RuntimeException("Token is missing or improperly formatted");
-//        }
-//        String jwtToken = token.replace("Bearer ", "");
-//        try {
-//            DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512("${SECRET_KEY}"))
-//                    .build()
-//                    .verify(jwtToken);
-//
-//            return decodedJWT.getClaim("memberId").asLong();
-//        } catch (JWTVerificationException e) {
-//            throw new RuntimeException("Invalid or expired token");
-//        }
-//    }
 
     public Long getMemberIdByEmail(String email) {
         return memberRepository.findByEmail(email)
@@ -54,19 +43,60 @@ public class NoteService {
 
     @Transactional
     public Note createNote(NoteDto.NewNoteDTO dto, Long memberId) {
+        // 1️⃣ 입력값 검증 (비어있는 값 확인)
+        if (dto.getDrinkDate() == null || dto.getSleepDate() == null) {
+            throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
+        }
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        // ✅ 날짜 파싱 (YYYY-MM-DD)
+        LocalDate writeDate;
+        LocalDate drinkDateOnly;
+        LocalDate sleepDateOnly;
+
+        try {
+            writeDate = LocalDate.parse(dto.getWriteDate(), dateFormatter);
+            drinkDateOnly = LocalDate.parse(dto.getDrinkDate(), dateFormatter);
+            sleepDateOnly = LocalDate.parse(dto.getSleepDate(), dateFormatter);
+        } catch (DateTimeParseException e) {
+            throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+        }
+
+        // ✅ 시간, 분을 정수로 변환
+        int drinkHour, drinkMinute, sleepHour, sleepMinute;
+        try {
+            drinkHour = Integer.parseInt(dto.getDrinkHour());
+            drinkMinute = Integer.parseInt(dto.getDrinkMinute());
+            sleepHour = Integer.parseInt(dto.getSleepHour());
+            sleepMinute = Integer.parseInt(dto.getSleepMinute());
+        } catch (NumberFormatException e) {
+            throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
+        }
+
+        // ✅ LocalDateTime으로 변환
+        LocalDateTime drinkDate = drinkDateOnly.atTime(drinkHour, drinkMinute);
+        LocalDateTime sleepDate = sleepDateOnly.atTime(sleepHour, sleepMinute);
+
+
+        // 3️⃣ Member 존재 여부 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_REGISTERED_USER));
 
+        // 4️⃣ Coffee 존재 여부 확인
         Coffee coffee = coffeeRepository.findById(dto.getCoffeeId())
-                .orElseThrow(() -> new RuntimeException("Coffee not found"));
+                .orElseThrow(() -> new GeneralException(ErrorStatus._COFFEE_NOT_FOUND));
 
+        // ✅ Note 엔티티 생성 및 저장
         Note note = Note.builder()
                 .member(member)
                 .coffee(coffee)
-                .drinkDate(LocalDateTime.parse(dto.getDrinkDate()))
-                .sleepDate(LocalDateTime.parse(dto.getSleepDate()))
+                .writeDate(writeDate)  // LocalDate
+                .drinkDate(drinkDate)  // LocalDateTime
+                .sleepDate(sleepDate)  // LocalDateTime
                 .review(dto.getReview())
                 .build();
+
 
         noteRepository.save(note);
         coffee.setDrinkCount(coffee.getDrinkCount() + 1);
@@ -78,7 +108,7 @@ public class NoteService {
     @Transactional
     public String deleteNote(Long memberId, Long noteId) {
         Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ErrorStatus._NOTE_NOT_FOUND));
 
         if (note.getMember().getId()!=memberId) {
             throw new GeneralException(ErrorStatus._UNAUTHORIZED); // 권한 없음 예외
@@ -94,9 +124,10 @@ public class NoteService {
         Page<Note> notesPage = noteRepository.findByMemberId(memberId, pageable);
 
         List<Note> notes = noteRepository.findByMemberId(memberId);
-        if (notes.isEmpty()) {
-            throw new NoteHandler(ErrorStatus._REVIEW_NOT_FOUND);
-        }
+        //노트 없으면 없는 거 보여주기
+//        if (notes.isEmpty()) {
+//            throw new NoteHandler(ErrorStatus._NOTE_NOT_FOUND);
+//        }
         List<NoteDto.NotePreviewDTO> notePreviews = notes.stream()
                 .map(note -> new NoteDto.NotePreviewDTO(
                         note.getId(),
@@ -122,7 +153,7 @@ public class NoteService {
     @Transactional(readOnly = true)
     public NoteDto.NoteDTO getNote(Long memberId, Long noteId) {
         Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._REVIEW_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ErrorStatus._NOTE_NOT_FOUND));
 
         if (note.getMember().getId()!=memberId) {
             throw new GeneralException(ErrorStatus._UNAUTHORIZED);
