@@ -32,9 +32,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _LOGIN_FAILED(HttpStatus.UNAUTHORIZED,"MEMBER401", "비밀번호가 틀렸습니다."),
 
     //리뷰 관련 응답
-    _NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTE404", "존재하지 않는 리뷰입니다."),
-    _NOTE_NOT_EXIST(HttpStatus.NOT_FOUND, "NOTE403", "해당 사용자가 리뷰를 작성하지 않았습니다."),
-    _NOTE_WRONG_INPUT(HttpStatus.BAD_REQUEST, "NOTE400", "입력된 노트의 형식이 잘못 되었습니다."),
+    _REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW404", "존재하지 않는 리뷰입니다."),
+    _REVIEW_NOT_EXIST(HttpStatus.NOT_FOUND, "REVIEW403", "해당 사용자가 리뷰를 작성하지 않았습니다."),
 
     //시간 관련 응답
     _EMPTY_TIME_INPUT(HttpStatus.BAD_REQUEST, "TIME400", "시간을 입력해야 합니다."),
@@ -69,6 +68,7 @@ public enum ErrorStatus implements BaseErrorCode {
                 .code(code)
                 .isSuccess(false)
                 .httpStatus(httpStatus)
-                .build();
+                .build()
+                ;
     }
 }

@@ -13,7 +13,8 @@ import java.util.List;
 
 public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
     List<Coffee> findByCaffeineBetweenOrderByCaffeineAsc(int minCaffeine, int maxCaffeine);
-//    List<Coffee> findAllByName(String name);
+
+    //    List<Coffee> findAllByName(String name);
 //    List<Coffee> findAllByBrand(Brand brand);
     @Query("SELECT c FROM Coffee c WHERE "
             + "c.name LIKE %:keyword% OR "
