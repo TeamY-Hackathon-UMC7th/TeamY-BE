@@ -92,8 +92,13 @@ public class CoffeeRestController {
              브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노
                 """
     )
-    public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(@RequestParam("keyword") String keyword) {
-        return coffeeService.searchByKeyword(keyword);
+    public ApiResponse<Page<CoffeeDto.CoffeeResponseDto>> searchByKeyword(@RequestParam("keyword") String keyword,
+                                                                          @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page) {
+
+        Pageable pageable = PageRequest.of(page - 1, 5);
+
+        Page<CoffeeDto.CoffeeResponseDto> coffees = coffeeService.searchByKeyword(keyword, pageable);
+        return ApiResponse.onSuccess(coffees);
     }
 
     @GetMapping("/recent")
@@ -109,12 +114,5 @@ public class CoffeeRestController {
     }
 
 
-    public ApiResponse<Page<Coffee>> searchByKeyword(@RequestParam("keyword") String keyword,
-                                                     @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page) {
 
-        Pageable pageable = PageRequest.of(page - 1, 5);
-
-        Page<Coffee> coffees = coffeeService.searchByKeyword(keyword, pageable);
-        return ApiResponse.onSuccess(coffees);
-    }
 }
