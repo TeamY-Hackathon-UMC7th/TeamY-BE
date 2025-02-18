@@ -3,6 +3,7 @@ package hackathon.spring.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.exception.CoffeeServiceException;
 import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
@@ -16,6 +17,9 @@ import hackathon.spring.repository.CoffeeRepository;
 import hackathon.spring.web.dto.CoffeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,23 +147,13 @@ public class CoffeeService {
     }
 
 
-    public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(String keyword) {
-        List<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword);
-        CoffeeDto coffeeDto = CoffeeDto.builder().coffees(coffees).build();
+    public Page<Coffee> searchByKeyword(String keyword, Pageable pageable) {
+        Page<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
 
         if (coffees == null || coffees.isEmpty()) {
-
-            CoffeeDto Dto = CoffeeDto.builder().coffees(null).build();
-
-            return ResponseEntity
-                    .status(SuccessStatus._OK.getHttpStatus())
-                    .body(ApiResponse.onFailure(
-                            ErrorStatus._COFFEE_NOT_FOUND.getCode(),
-                            ErrorStatus._COFFEE_NOT_FOUND.getMessage(),
-                            Dto));
+            throw new CoffeeServiceException(ErrorStatus._COFFEE_NOT_FOUND);
         }
-
-        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
+        return coffees;
     }
 
     public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees(String email) {
@@ -173,7 +167,6 @@ public class CoffeeService {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(recentRecommend5Coffees));
     }
-
 
 
 
