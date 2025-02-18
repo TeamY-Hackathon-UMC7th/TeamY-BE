@@ -1,7 +1,9 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.MemberService;
+import hackathon.spring.service.NoteService;
 import hackathon.spring.web.dto.MemberDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +14,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MemberRestController {
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
+    private final NoteService noteService;
 
     // 닉네임 중복 체크
 //    @GetMapping("/check/{nickname}")
@@ -102,5 +108,20 @@ public class MemberRestController {
         return memberService.updatePassword(passwordDto);
     }
 
+    // 액세스토큰 재발급
+    @PostMapping("/alarm/{notification}")
+    @Operation(
+            summary = "알림 동의 API",
+            description = """
+              refresh토큰으로 access토큰 재발급받는 API입니다.
+                """
+    )
+    public ApiResponse<String> notifyAlarm(@PathVariable Boolean notification) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
+        Long userId = noteService.getMemberIdByEmail(email);
+
+        return memberService.notifyAlarm(notification, userId);
+    }
 
 }

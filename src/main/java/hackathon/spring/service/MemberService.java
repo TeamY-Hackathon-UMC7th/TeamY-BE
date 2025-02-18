@@ -105,6 +105,7 @@ public class MemberService {
                 .email(memberDto.getEmail())
                 .password(encodedPassword)
                 .nickname(nickname)
+                .notification(false)
                 .build();
         memberRepository.save(member);
 
@@ -304,4 +305,10 @@ public class MemberService {
         return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "비밀번호가 변경되었습니다.");
     }
 
+    public ApiResponse<String> notifyAlarm(Boolean notification, Long userId) {
+        Member member = memberRepository.findById(userId).get();
+        member.setNotification(notification);
+        memberRepository.save(member);
+        return ApiResponse.onSuccess("알림 설정에 성공하였습니다. 알림 설정: " + notification);
+    }
 }

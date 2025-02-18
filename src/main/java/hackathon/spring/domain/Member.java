@@ -1,7 +1,9 @@
 package hackathon.spring.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.groups.Default;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,6 +28,9 @@ public class Member {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private boolean notification;
 
     public void setPassword(String password) {
         this.password = password;  // 비밀번호 해싱
