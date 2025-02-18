@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = jwtTokenProvider.resolveToken(request);
 
             if (token != null && jwtTokenProvider.validateToken(token)) {
+                System.out.println("토큰이 validate되었습니다!");
                 if (jwtTokenProvider.isBlacklisted(token)) {
                     log.error("❌ [JwtAuthenticationFilter] 블랙리스트 요청 → 401 반환");
                     handleAuthenticationError(response, "접근할 수 없는 사용자입니다.");
