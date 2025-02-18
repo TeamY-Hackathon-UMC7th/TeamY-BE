@@ -119,13 +119,6 @@ public class CoffeeService {
                 .map(CoffeeDto.CoffeePreviewDTO::fromEntity) // Coffee 엔티티에서 DTO 변환하는 메서드 필요
                 .collect(Collectors.toList());
 
-//        // Coffee -> CoffeePreviewDTO 변환
-//        List<CoffeeDto.CoffeeDetailPreviewDTO> mostPopularCoffees5 = topDrinks.stream()
-//                .map(CoffeeDto.CoffeeDetailPreviewDTO::fromEntity) // Coffee 엔티티에서 DTO 변환하는 메서드 필요
-//                .collect(Collectors.toList());
-//
-//        // CoffeeDto로 감싸기
-//        CoffeeDto.CoffeePreviewDTO coffeeDto = new CoffeeDto.CoffeePreviewDTO(recommendedCoffees);
 
         coffeeRecommendRepository.saveRecentCoffee(email, recommendedCoffees.get(0));
 
@@ -167,11 +160,6 @@ public class CoffeeService {
     public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees(String email) {
         // 커피 목록 조회
         List<CoffeeDto.CoffeePreviewDTO> recentRecommend5Coffees = coffeeRecommendRepository.getRecentRecommendedCoffees(email);
-
-        // 데이터가 없을 경우 예외 처리
-        if (CollectionUtils.isEmpty(recentRecommend5Coffees)) {
-            throw new NoSuchElementException("커피 데이터가 존재하지 않습니다.");
-        }
 
         return ResponseEntity.ok(ApiResponse.onSuccess(recentRecommend5Coffees));
     }
