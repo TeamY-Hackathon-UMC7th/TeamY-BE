@@ -33,6 +33,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER401", "비밀번호가 틀렸습니다."),
     _NOT_CHANGE_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER400", "이전 비밀번호와 동일합니다"),
     _EMPTY_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER400", "닉네임을 입력해야 합니다."),
+    _INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "MEMBER400", "닉네임은 10자 이내로 적어주세요."),
     _NOT_LOGIN_USER(HttpStatus.UNAUTHORIZED, "MEMBER401", "로그인을 먼저 진행해야 합니다."),
     _NOT_REGISTERED_USER(HttpStatus.UNAUTHORIZED, "MEMBER401", "회원가입을 먼저 진행해야 합니다."),
 

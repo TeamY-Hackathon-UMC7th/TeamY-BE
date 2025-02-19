@@ -9,10 +9,14 @@ import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.web.dto.MemberDto;
 import hackathon.spring.domain.Member;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 @Service
@@ -31,6 +37,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JavaMailSender mailSender;
 
 
     // 닉네임 중복 가능해서 사용 X
@@ -110,23 +117,65 @@ public class MemberService {
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
+    // 인증코드 생성
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000); // 100000 ~ 999999 범위의 숫자 생성
+        return String.valueOf(code);
+    }
+
+    // 인증코드 이메일로 전송
+    private void sendVerificationEmail(String toEmail, String verificationCode) {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setTo(toEmail);
+            helper.setSubject("회원가입 이메일 인증 코드");
+            helper.setText("인증 코드: " + verificationCode + "\n이 코드는 5분 동안 유효합니다.", false);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("이메일 발송 실패", e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> sendVerificationCode(String email) {
+
+         if(memberRepository.existsByEmail(email)) {
+             MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
+                     .canUse(false)
+                     .code(null)
+                     .build();
+
+             return ApiResponse.onSuccess(SuccessStatus._OK, response);
+         }
+
+        String verificationCode = generateVerificationCode(); // 인증 코드 생성
+        sendVerificationEmail(email, verificationCode); // 이메일 발송
+
+        MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
+                .canUse(true)
+                .code(verificationCode)
+                .build();
+
+        return ApiResponse.onSuccess(SuccessStatus._OK, response);
+
+    }
+
     @Transactional
     public ResponseEntity<ApiResponse<Object>> login(MemberDto.LoginRequestDto memberDto) {
         if (memberDto == null || memberDto.getEmail() == null || memberDto.getEmail().trim().isEmpty()) {
             throw new GeneralException(ErrorStatus._EMPTY_EMAIL);
         }
 
-        Optional<Member> member = memberRepository.findByEmail(memberDto.getEmail());
-        if (member.isEmpty()) {
-            throw new GeneralException(ErrorStatus._NOT_REGISTERED_USER);
-        }
+        Member member = memberRepository.findByEmail(memberDto.getEmail())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(memberDto.getPassword(), member.get().getPassword())) {
+        if (!passwordEncoder.matches(memberDto.getPassword(), member.getPassword())) {
             throw new GeneralException(ErrorStatus._INVALID_PASSWORD);
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(member.get().getEmail());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(member.get().getEmail());
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getEmail());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(member.getEmail());
 
         // Set-Cookie 헤더로 토큰 저장
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
@@ -144,8 +193,8 @@ public class MemberService {
                 .build();
 
         MemberDto.LoginResultDto response = MemberDto.LoginResultDto.builder()
-                .id(member.get().getId())
-                .email(member.get().getEmail())
+                .id(member.getId())
+                .email(member.getEmail())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .accessTokenExpiresIn(jwtTokenProvider.getAccessTokenExpiration())
@@ -233,6 +282,7 @@ public class MemberService {
                 .body(ApiResponse.onSuccess(SuccessStatus._OK, response).getBody());
     }
 
+    @Transactional
     public ResponseEntity<ApiResponse> updatePassword(MemberDto.PasswordChangeRequestDto passwordDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -264,12 +314,30 @@ public class MemberService {
 
         member.setPassword(encodedPassword);
 
-        // DB에 저장
-        memberRepository.save(member);
-
         return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "비밀번호가 변경되었습니다.");
     }
 
+    @Transactional
+    public ResponseEntity<ApiResponse> updateNickname(String nickname) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new GeneralException(ErrorStatus._EMPTY_NICKNAME);
+        }
+
+        if(nickname.length()>10){
+            throw new GeneralException(ErrorStatus._INVALID_NICKNAME_FORMAT);
+        }
+
+        member.setNickname(nickname);
+
+        return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "닉네임이 변경되었습니다.");
+    }
+
+    @Transactional
     public ApiResponse<String> notifyAlarm(Boolean notification, Long userId) {
         Member member = memberRepository.findById(userId).get();
         member.setNotification(notification);
