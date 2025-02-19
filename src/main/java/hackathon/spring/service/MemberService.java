@@ -11,7 +11,6 @@ import hackathon.spring.web.dto.MemberDto;
 import hackathon.spring.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.util.Objects;
@@ -35,12 +33,13 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    public ResponseEntity<ApiResponse> checkNickname(String nickname) {
-        if (memberRepository.existsByNickname(nickname)) {
-            return ResponseEntity.ok(ApiResponse.onSuccess("이미 사용중인 닉네임입니다."));
-        }
-        return ResponseEntity.ok(ApiResponse.onSuccess("사용 가능한 닉네임입니다."));
-    }
+    // 닉네임 중복 가능해서 사용 X
+//    public ResponseEntity<ApiResponse> checkNickname(String nickname) {
+//        if (memberRepository.existsByNickname(nickname)) {
+//            return ResponseEntity.ok(ApiResponse.onSuccess("이미 사용중인 닉네임입니다."));
+//        }
+//        return ResponseEntity.ok(ApiResponse.onSuccess("사용 가능한 닉네임입니다."));
+//    }
 
     private class PasswordValidator {
         private static final String PASSWORD_PATTERN =
@@ -67,35 +66,29 @@ public class MemberService {
     public ResponseEntity<ApiResponse> signUp(MemberDto.JoinRequestDto memberDto) {
 
         if (memberDto == null || memberDto.getEmail() == null || memberDto.getEmail().trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "이메일은 필수 입력값입니다.", null));
+            throw new GeneralException(ErrorStatus._EMPTY_EMAIL);
         }
 
         if (memberDto.getPassword() == null || memberDto.getPassword().trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "비밀번호를 필수 입력값입니다.", null));
+            throw new GeneralException(ErrorStatus._EMPTY_PASSWORD);
         }
 
         String email = memberDto.getEmail();
         String password = memberDto.getPassword();
 
         if (!EmailValidator.isValidEmail(email)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "올바른 이메일 형식이 아닙니다.", null));
+            throw new GeneralException(ErrorStatus._INVALID_EMAIL_FORMAT);
         }
 
         if (memberRepository.existsByEmail(email))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "이미 사용중인 이메일입니다.", null));
+            throw new GeneralException(ErrorStatus._DUPLICATE_EMAIL);
 
         if (!PasswordValidator.isValidPassword(password)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.", null));
+            throw new GeneralException(ErrorStatus._INVALID_PASSWORD_FORMAT);
         }
 
         if (!Objects.equals(memberDto.getCheckPassword(), password)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "비밀번호가 일치하지 않습니다.", null));
+            throw new GeneralException(ErrorStatus._NOT_MATCH_PASSWORD);
         }
 
         String nickname = email.substring(0, email.indexOf("@"));
@@ -120,19 +113,16 @@ public class MemberService {
     @Transactional
     public ResponseEntity<ApiResponse<Object>> login(MemberDto.LoginRequestDto memberDto) {
         if (memberDto == null || memberDto.getEmail() == null || memberDto.getEmail().trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "이메일은 필수 입력값입니다.", null));
+            throw new GeneralException(ErrorStatus._EMPTY_EMAIL);
         }
 
         Optional<Member> member = memberRepository.findByEmail(memberDto.getEmail());
         if (member.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.onFailure("404", "등록된 이메일이 없습니다.", null));
+            throw new GeneralException(ErrorStatus._NOT_REGISTERED_USER);
         }
 
         if (!passwordEncoder.matches(memberDto.getPassword(), member.get().getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.onFailure("401", "비밀번호가 틀렸습니다.", null));
+            throw new GeneralException(ErrorStatus._INVALID_PASSWORD);
         }
 
         String accessToken = jwtTokenProvider.generateAccessToken(member.get().getEmail());
@@ -213,18 +203,10 @@ public class MemberService {
         String email = authentication.getName();
         String token = authentication.getCredentials().toString();
 
-        Optional<Member> member = memberRepository.findByEmail(email);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if(member.isEmpty()){
-            return ResponseEntity
-                    .status(ErrorStatus._MEMBER_NOT_FOUND.getHttpStatus())
-                    .body(ApiResponse.onSuccess(
-                            ErrorStatus._MEMBER_NOT_FOUND.getCode(),
-                            ErrorStatus._MEMBER_NOT_FOUND.getMessage(),
-                            null));
-        }
-
-        String accessToken = jwtTokenProvider.generateAccessToken(member.get().getEmail());
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getEmail());
 
         // Set-Cookie 헤더로 토큰 저장
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
@@ -235,8 +217,8 @@ public class MemberService {
                 .build();
 
         MemberDto.LoginResultDto response = MemberDto.LoginResultDto.builder()
-                .id(member.get().getId())
-                .email(member.get().getEmail())
+                .id(member.getId())
+                .email(member.getEmail())
                 .accessToken(accessToken)
                 .refreshToken(token)
                 .accessTokenExpiresIn(jwtTokenProvider.getAccessTokenExpiration())
@@ -255,52 +237,35 @@ public class MemberService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        Optional<Member> member = memberRepository.findByEmail(email);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if(member.isEmpty()){
-            return ResponseEntity
-                    .status(ErrorStatus._MEMBER_NOT_FOUND.getHttpStatus())
-                    .body(ApiResponse.onSuccess(
-                            ErrorStatus._MEMBER_NOT_FOUND.getCode(),
-                            ErrorStatus._MEMBER_NOT_FOUND.getMessage(),
-                            null));
-        }
-
-        String storedPassword = member.get().getPassword(); // DB에 저장된 해싱된 비밀번호
+        String storedPassword = member.getPassword(); // DB에 저장된 해싱된 비밀번호
         String currentPassword = passwordDto.getCurrentPassword();
         String updatePassword = passwordDto.getUpdatePassword();
 
         // 입력한 비밀번호와 비교
         if(!passwordEncoder.matches(currentPassword, storedPassword)){
-            return ResponseEntity
-                    .status(ErrorStatus._LOGIN_FAILED.getHttpStatus())
-                    .body(ApiResponse.onSuccess(
-                            ErrorStatus._LOGIN_FAILED.getCode(),
-                            ErrorStatus._LOGIN_FAILED.getMessage(),
-                            null));
+            throw new GeneralException(ErrorStatus._INVALID_PASSWORD);
         }
         if (passwordEncoder.matches(updatePassword, storedPassword)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "이전 비밀번호와 같습니다.", null));
+            throw new GeneralException(ErrorStatus._NOT_CHANGE_PASSWORD);
         }
 
         if (!PasswordValidator.isValidPassword(updatePassword)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.", null));
+            throw new GeneralException(ErrorStatus._INVALID_PASSWORD_FORMAT);
         }
 
         if(!Objects.equals(passwordDto.getCheckPassword(), updatePassword)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.onFailure("400", "비밀번호가 일치하지 않습니다.", null));
+            throw new GeneralException(ErrorStatus._NOT_MATCH_PASSWORD);
         }
 
         String encodedPassword = passwordEncoder.encode(updatePassword);
 
-        Member memberEntity = member.get();
-        memberEntity.setPassword(encodedPassword);
+        member.setPassword(encodedPassword);
 
         // DB에 저장
-        memberRepository.save(memberEntity);
+        memberRepository.save(member);
 
         return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "비밀번호가 변경되었습니다.");
     }
