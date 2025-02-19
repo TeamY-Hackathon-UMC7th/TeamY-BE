@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import hackathon.spring.apiPayload.code.BaseCode;
+import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, SuccessStatus._OK.getCode() , SuccessStatus._OK.getMessage(), result);
     }
 
-    public static <T> ApiResponse<T> of(BaseCode code, T result){
+    public static <T> ApiResponse<T> onSuccess(BaseCode code, T result){
             return new ApiResponse<>(true, code.getReasonHttpStatus().getCode() , code.getReasonHttpStatus().getMessage(), result);
     }
 
@@ -36,7 +37,19 @@ public class ApiResponse<T> {
     }
 
 
-    //실패한 경우 응답 생성
+    // 실패한 경우 응답 생성 (ErrorStatus 활용)
+    public static <T> ApiResponse<T> onFailure(ErrorStatus errorStatus, T result) {
+        return new ApiResponse<>(
+                false,
+                errorStatus.getCode(),  // 에러 코드
+                errorStatus.getMessage(), // 에러 메시지
+                result);
+    }
+
+    public static <T> ApiResponse<T> onFailure(String code, T data) {
+        return new ApiResponse<>(false, code, "요청 처리 중 오류가 발생했습니다.", data);
+    }
+
     public static <T> ApiResponse<T> onFailure(String code, String message, T data) {
         return new ApiResponse<>(false, code, message, data);
     }

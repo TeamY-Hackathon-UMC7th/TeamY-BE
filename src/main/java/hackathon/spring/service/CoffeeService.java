@@ -1,20 +1,30 @@
 package hackathon.spring.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.exception.CoffeeServiceException;
 import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
+import hackathon.spring.convertor.CoffeeConverter;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.domain.uuid.Uuid;
 import hackathon.spring.domain.uuid.UuidRepository;
+import hackathon.spring.repository.CoffeeRecommendRepository;
 import hackathon.spring.repository.CoffeeRepository;
-import hackathon.spring.s3.AmazonS3Manager;
+//import hackathon.spring.s3.AmazonS3Manager;
 import hackathon.spring.web.dto.CoffeeDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -31,35 +41,39 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = false)
 public class CoffeeService {
     private final CoffeeRepository coffeeRepository;
-    private final AmazonS3Manager s3Manager;
+    private final CoffeeRecommendRepository coffeeRecommendRepository;
+//    private final AmazonS3Manager s3Manager;
+//    private final UuidRepository uuidRepository;
+
     private final UuidRepository uuidRepository;
+    private final CoffeeConverter coffeeConverter;
 
-    public Coffee addCoffee(String name, Brand brand,Integer sugar, Integer caffeine, Integer calories, Integer protein, MultipartFile coffeeImg) {
-        // UUID 생성 및 저장
-        String uuid = UUID.randomUUID().toString();
-        Uuid savedUuid = uuidRepository.save(Uuid.builder()
-                .uuid(uuid).build());
+//    public Coffee addCoffee(String name, Brand brand,Integer sugar, Integer caffeine, Integer calories, Integer protein, MultipartFile coffeeImg) {
+//        // UUID 생성 및 저장
+//        String uuid = UUID.randomUUID().toString();
+//        Uuid savedUuid = uuidRepository.save(Uuid.builder()
+//                .uuid(uuid).build());
+//
+//        // 이미지 업로드
+//        String imageKey = s3Manager.generateKeyName(savedUuid); // 커피 이미지에 적합한 KeyName 생성
+//        String imageUrl = s3Manager.uploadFile(imageKey, coffeeImg);
+//
+//        // Coffee 객체 생성
+//        Coffee newCoffee = Coffee.builder()
+//                .name(name)
+//                .brand(brand)
+//                .sugar(sugar)
+//                .caffeine(caffeine)
+//                .calories(calories)
+//                .protein(protein)
+//                .coffeeImgUrl(imageUrl) // 이미지 URL 설정
+//                .build();
+//
+//        // Coffee 객체 저장
+//        return coffeeRepository.save(newCoffee);
+//    }
 
-        // 이미지 업로드
-        String imageKey = s3Manager.generateKeyName(savedUuid); // 커피 이미지에 적합한 KeyName 생성
-        String imageUrl = s3Manager.uploadFile(imageKey, coffeeImg);
-
-        // Coffee 객체 생성
-        Coffee newCoffee = Coffee.builder()
-                .name(name)
-                .brand(brand)
-                .sugar(sugar)
-                .caffeine(caffeine)
-                .calories(calories)
-                .protein(protein)
-                .coffeeImgUrl(imageUrl) // 이미지 URL 설정
-                .build();
-
-        // Coffee 객체 저장
-        return coffeeRepository.save(newCoffee);
-    }
-
-    public ResponseEntity<ApiResponse<CoffeeDto>> recommendByCaffeineLimit(Integer userHourInput) {
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> recommendByCaffeineLimit(String email, Integer userHourInput) {
         if (userHourInput == null) {
             throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
         }
@@ -100,56 +114,57 @@ public class CoffeeService {
         Collections.shuffle(coffeeList);  // 리스트를 무작위로 섞기
 
         // 상위 5개의 커피를 추천
-        List<Coffee> recommendedCoffees = coffeeList.stream()
+        List<CoffeeDto.CoffeePreviewDTO> recommendedCoffees = coffeeList.stream()
                 .limit(5)
+                .map(CoffeeDto.CoffeePreviewDTO::fromEntity) // Coffee 엔티티에서 DTO 변환하는 메서드 필요
                 .collect(Collectors.toList());
 
-        // CoffeeDto로 감싸기
-        CoffeeDto coffeeDto = new CoffeeDto(recommendedCoffees);
 
+        coffeeRecommendRepository.saveRecentCoffee(email, recommendedCoffees.get(0));
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
+        return ResponseEntity.ok(ApiResponse.onSuccess(recommendedCoffees));
     }
 
-    public ResponseEntity<ApiResponse<CoffeeDto>> recommendPopularCoffees(){
-        List<Coffee> allCoffees = coffeeRepository.findAll();
-        if (allCoffees.isEmpty()) {
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeeDetailPreviewDTO>>> getPopularCoffees(){
+        // 커피 목록 조회
+        List<Coffee> topDrinks = coffeeRepository.findTop5ByOrderByDrinkCountDesc();
+
+        // 데이터가 없을 경우 예외 처리
+        if (CollectionUtils.isEmpty(topDrinks)) {
             throw new NoSuchElementException("커피 데이터가 존재하지 않습니다.");
         }
 
-        // 커피 리스트를 랜덤으로 섞기
-        Collections.shuffle(allCoffees);
-
-        // 상위 5개의 커피를 추천
-        List<Coffee> recommendedCoffees = allCoffees.stream()
-                .limit(5)
+        // Coffee -> CoffeePreviewDTO 변환
+        List<CoffeeDto.CoffeeDetailPreviewDTO> mostPopularCoffees5 = topDrinks.stream()
+                .map(CoffeeDto.CoffeeDetailPreviewDTO::fromEntity) // Coffee 엔티티에서 DTO 변환하는 메서드 필요
                 .collect(Collectors.toList());
 
-        // CoffeeDto로 감싸기
-        CoffeeDto coffeeDto = new CoffeeDto(recommendedCoffees);
-
-
-        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
+        return ResponseEntity.ok(ApiResponse.onSuccess(mostPopularCoffees5));
     }
 
 
-    public ResponseEntity<ApiResponse<CoffeeDto>> searchByKeyword(String keyword) {
-        List<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword);
-        CoffeeDto coffeeDto = CoffeeDto.builder().coffees(coffees).build();
+    public Page<CoffeeDto.CoffeeResponseDto> searchByKeyword(String keyword, Pageable pageable) {
+        Page<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
 
         if (coffees == null || coffees.isEmpty()) {
-
-            CoffeeDto Dto = CoffeeDto.builder().coffees(null).build();
-
-            return ResponseEntity
-                    .status(SuccessStatus._OK.getHttpStatus())
-                    .body(ApiResponse.onFailure(
-                            ErrorStatus._COFFEE_NOT_FOUND.getCode(),
-                            ErrorStatus._COFFEE_NOT_FOUND.getMessage(),
-                            Dto));
+            throw new CoffeeServiceException(ErrorStatus._COFFEE_NOT_FOUND);
         }
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeDto));
+        List<CoffeeDto.CoffeeResponseDto> coffeeResponseDtos = coffees.stream()
+                .map(coffeeConverter::toCoffeeDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(coffeeResponseDtos, pageable, coffees.getTotalElements());
     }
+
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees(String email) {
+        // 커피 목록 조회
+        List<CoffeeDto.CoffeePreviewDTO> recentRecommend5Coffees = coffeeRecommendRepository.getRecentRecommendedCoffees(email);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(recentRecommend5Coffees));
+    }
+
+
+
 
 }
