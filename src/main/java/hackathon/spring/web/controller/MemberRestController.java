@@ -52,6 +52,17 @@ public class MemberRestController {
         return memberService.signUp(memberDto);
     }
 
+    @PostMapping("/email")
+    @Operation(
+            summary = "이메일 인증 API",
+            description = """
+              이메일로 인증번호를 받는 API입니다.
+                """
+    )
+    public ResponseEntity<ApiResponse> verifyCode(@RequestParam String email) {
+        return memberService.sendVerificationCode(email);
+    }
+
     // 로그인
     @PostMapping("/login")
     @Operation(
@@ -108,12 +119,12 @@ public class MemberRestController {
         return memberService.updatePassword(passwordDto);
     }
 
-    // 액세스토큰 재발급
+    // 알림 동의
     @PostMapping("/alarm/{notification}")
     @Operation(
             summary = "알림 동의 API",
             description = """
-              refresh토큰으로 access토큰 재발급받는 API입니다.
+              알림 동의여부를 체크하는 API입니다.
                 """
     )
     public ApiResponse<String> notifyAlarm(@PathVariable Boolean notification) {
@@ -122,6 +133,17 @@ public class MemberRestController {
         Long userId = noteService.getMemberIdByEmail(email);
 
         return memberService.notifyAlarm(notification, userId);
+    }
+
+    @PostMapping("/nickname/update")
+    @Operation(
+            summary = "닉네임 변경 API",
+            description = """
+              닉네임을 변경하는 API입니다.
+                """
+    )
+    public ResponseEntity<ApiResponse> updateNickname(@RequestParam String nickname) {
+        return memberService.updateNickname(nickname);
     }
 
 }

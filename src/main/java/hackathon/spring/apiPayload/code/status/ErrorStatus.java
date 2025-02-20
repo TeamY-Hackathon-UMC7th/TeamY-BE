@@ -25,7 +25,15 @@ public enum ErrorStatus implements BaseErrorCode {
     //멤버 관련 응답
     _DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "MEMBER409", "이미 사용 중인 닉네임입니다."),
     _DUPLICATE_EMAIL(HttpStatus.CONFLICT, "MEMBER409", "이미 사용 중인 이메일입니다."),
+    _EMPTY_EMAIL(HttpStatus.BAD_REQUEST, "MEMBER400", "이메일을 입력해야 합니다."),
+    _INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "MEMBER400", "올바른 이메일 형식이 아닙니다."),
+    _EMPTY_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER400", "비밀번호를 입력해야 합니다."),
+    _INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "MEMBER400", "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다."),
+    _NOT_MATCH_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER400", "비밀번호가 일치하지 않습니다."),
+    _INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER401", "비밀번호가 틀렸습니다."),
+    _NOT_CHANGE_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER400", "이전 비밀번호와 동일합니다"),
     _EMPTY_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER400", "닉네임을 입력해야 합니다."),
+    _INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "MEMBER400", "닉네임은 10자 이내로 적어주세요."),
     _NOT_LOGIN_USER(HttpStatus.UNAUTHORIZED, "MEMBER401", "로그인을 먼저 진행해야 합니다."),
     _NOT_REGISTERED_USER(HttpStatus.UNAUTHORIZED, "MEMBER401", "회원가입을 먼저 진행해야 합니다."),
 

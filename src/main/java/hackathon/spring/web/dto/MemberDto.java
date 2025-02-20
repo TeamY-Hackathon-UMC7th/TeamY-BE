@@ -48,6 +48,16 @@ public class MemberDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class EmailResultDto {
+
+        private Boolean canUse;
+        private String code;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class LoginRequestDto {
 
         @NotNull
