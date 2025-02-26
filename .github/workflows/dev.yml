@@ -60,17 +60,8 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         envs: GITHUB_SHA
         script: |
-          # Redis 컨테이너가 실행 중인지 확인
-          if [ "$(sudo docker ps -q -f name=redis-container)" ]; then
-            echo "✅ Redis 컨테이너가 이미 실행 중입니다. 유지합니다."
-          else
-            echo "🚀 Redis 컨테이너가 실행되지 않아 새로 실행합니다."
-            sudo docker run -d --name redis-container -p 6379:6379 redis redis-server --requirepass "${{ secrets.REDIS_PASSWORD }}"
-          fi
-
-          # Spring Boot 컨테이너 삭제 후 최신 버전으로 실행
-          sudo docker ps -qa --filter "ancestor=${{ secrets.DOCKERHUB_REPO }}" | xargs -r sudo docker rm -f
-
+          sudo docker ps -qa | xargs -r sudo docker rm -f
           sudo docker pull ${{ secrets.DOCKERHUB_REPO }}:latest
           sudo docker run -d -p 8080:8080 ${{ secrets.DOCKERHUB_REPO }}:latest
           sudo docker image prune -f
+          
