@@ -48,8 +48,9 @@ public class MemberRestController {
               닉네임으로 회원가입하는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse> signUp(@RequestBody MemberDto.JoinRequestDto memberDto) {
-        return memberService.signUp(memberDto);
+    public ApiResponse<MemberDto.JoinResultDto> signUp(@RequestBody MemberDto.JoinRequestDto memberDto) {
+        MemberDto.JoinResultDto response = memberService.signUp(memberDto);
+        return ApiResponse.onSuccess(response);
     }
 
     @PostMapping("/email")
@@ -59,8 +60,9 @@ public class MemberRestController {
               이메일로 인증번호를 받는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse> verifyCode(@RequestParam String email) {
-        return memberService.sendVerificationCode(email);
+    public ApiResponse<MemberDto.EmailResultDto> verifyCode(@RequestParam String email) {
+        MemberDto.EmailResultDto response = memberService.sendVerificationCode(email);
+        return ApiResponse.onSuccess(response);
     }
 
     // 로그인

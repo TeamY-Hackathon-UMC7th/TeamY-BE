@@ -70,7 +70,7 @@ public class MemberService {
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse> signUp(MemberDto.JoinRequestDto memberDto) {
+    public MemberDto.JoinResultDto signUp(MemberDto.JoinRequestDto memberDto) {
 
         if (memberDto == null || memberDto.getEmail() == null || memberDto.getEmail().trim().isEmpty()) {
             throw new GeneralException(ErrorStatus._EMPTY_EMAIL);
@@ -114,7 +114,7 @@ public class MemberService {
                 .email(memberDto.getEmail())
                 .build();
 
-        return ApiResponse.onSuccess(SuccessStatus._OK, response);
+        return response;
     }
 
     // 인증코드 생성
@@ -138,7 +138,7 @@ public class MemberService {
         }
     }
 
-    public ResponseEntity<ApiResponse> sendVerificationCode(String email) {
+    public MemberDto.EmailResultDto sendVerificationCode(String email) {
 
          if(memberRepository.existsByEmail(email)) {
              MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
@@ -146,7 +146,7 @@ public class MemberService {
                      .code(null)
                      .build();
 
-             return ApiResponse.onSuccess(SuccessStatus._OK, response);
+             return response;
          }
 
         String verificationCode = generateVerificationCode(); // 인증 코드 생성
@@ -157,7 +157,7 @@ public class MemberService {
                 .code(verificationCode)
                 .build();
 
-        return ApiResponse.onSuccess(SuccessStatus._OK, response);
+        return response;
 
     }
 
