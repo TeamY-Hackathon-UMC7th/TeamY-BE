@@ -1,6 +1,7 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.domain.Member;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.MemberService;
 import hackathon.spring.service.NoteService;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 
 
 @RestController
@@ -146,4 +148,17 @@ public class MemberRestController {
         return memberService.updateNickname(nickname);
     }
 
+    @GetMapping("/user")
+    @Operation(
+            summary = "회원정보 반환 API",
+            description = """
+              회원 정보를 반환하는 API입니다.
+                """
+    )
+    public ApiResponse<Member> returnUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
+        Member member = memberRepository.findMemberByEmail(email);
+        return ApiResponse.onSuccess(member);
+    }
 }

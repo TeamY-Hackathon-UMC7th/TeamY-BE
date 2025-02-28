@@ -344,4 +344,6 @@ public class MemberService {
         memberRepository.save(member);
         return ApiResponse.onSuccess("알림 설정에 성공하였습니다. 알림 설정: " + notification);
     }
+
+
 }
