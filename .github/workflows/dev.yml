@@ -53,7 +53,7 @@ jobs:
 
     steps:
     - name: Deploy to Server
-      uses: appleboy/ssh-action@v0.1.9
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USERNAME }}
