@@ -52,6 +52,9 @@ jobs:
     needs: [docker]
 
     steps:
+    - name: Check GitHub Runner Public IP
+      run: curl ifconfig.me
+
     - name: Deploy to Server
       uses: appleboy/ssh-action@master
       with:
