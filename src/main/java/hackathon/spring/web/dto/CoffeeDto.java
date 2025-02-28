@@ -84,4 +84,17 @@ public class CoffeeDto {
         private Integer protein;
         private String coffeeImgUrl;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CoffeeListResponseDto {
+        private List<CoffeeResponseDto> coffeeResponseDtos;
+        private Integer listSize;
+        private Integer totalPage;
+        private Long totalElements;
+        private Boolean isFirst;
+        private Boolean isLast;
+    }
 }

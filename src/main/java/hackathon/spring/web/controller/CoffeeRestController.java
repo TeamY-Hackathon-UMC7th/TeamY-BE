@@ -1,6 +1,7 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.convertor.CoffeeConverter;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.service.CoffeeService;
@@ -92,13 +93,13 @@ public class CoffeeRestController {
              브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노
                 """
     )
-    public ApiResponse<Page<CoffeeDto.CoffeeResponseDto>> searchByKeyword(@RequestParam("keyword") String keyword,
-                                                                          @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page) {
+    public ApiResponse<CoffeeDto.CoffeeListResponseDto> searchByKeyword(@RequestParam("keyword") String keyword,
+                                                                        @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") Integer page) {
 
-        Pageable pageable = PageRequest.of(page - 1, 5);
+        Pageable pageable = PageRequest.of(page, 6);
 
-        Page<CoffeeDto.CoffeeResponseDto> coffees = coffeeService.searchByKeyword(keyword, pageable);
-        return ApiResponse.onSuccess(coffees);
+        Page<Coffee> coffeePage = coffeeService.searchByKeyword(keyword, pageable);
+        return ApiResponse.onSuccess(CoffeeConverter.toCoffeeListDto(coffeePage));
     }
 
     @GetMapping("/recent")

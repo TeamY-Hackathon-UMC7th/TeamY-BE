@@ -143,18 +143,18 @@ public class CoffeeService {
     }
 
 
-    public Page<CoffeeDto.CoffeeResponseDto> searchByKeyword(String keyword, Pageable pageable) {
+    public Page<Coffee> searchByKeyword(String keyword, Pageable pageable) {
         Page<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
 
         if (coffees == null || coffees.isEmpty()) {
             throw new CoffeeServiceException(ErrorStatus._COFFEE_NOT_FOUND);
         }
 
-        List<CoffeeDto.CoffeeResponseDto> coffeeResponseDtos = coffees.stream()
-                .map(coffeeConverter::toCoffeeDto)
-                .collect(Collectors.toList());
+//        List<CoffeeDto.CoffeeResponseDto> coffeeResponseDtos = coffees.stream()
+//                .map(coffeeConverter::toCoffeeDto)
+//                .collect(Collectors.toList());
 
-        return new PageImpl<>(coffeeResponseDtos, pageable, coffees.getTotalElements());
+        return coffees;
     }
 
     public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees(String email) {

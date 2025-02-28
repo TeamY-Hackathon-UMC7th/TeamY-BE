@@ -16,6 +16,7 @@ public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
 //    List<Coffee> findAllByName(String name);
 //    List<Coffee> findAllByBrand(Brand brand);
     List<Coffee> findTop5ByOrderByDrinkCountDesc();
+
     @Query("SELECT c FROM Coffee c WHERE "
             + "c.name LIKE %:keyword% OR "
             + "CAST(c.brand AS string) LIKE %:keyword% OR "
