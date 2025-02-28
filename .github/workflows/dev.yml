@@ -58,10 +58,14 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        envs: GITHUB_SHA
+        port: 22
         script: |
+          sudo -i <<'EOF'
           sudo docker ps -qa | xargs -r sudo docker rm -f
+          source ~/.bashrc
+          sudo docker logs $(sudo docker ps -l -q)
           sudo docker pull ${{ secrets.DOCKERHUB_REPO }}:latest
           sudo docker run -d -p 8080:8080 ${{ secrets.DOCKERHUB_REPO }}:latest
           sudo docker image prune -f
+          EOF
           
