@@ -161,6 +161,50 @@ public class MemberService {
 
     }
 
+    // 인증코드 생성
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000); // 100000 ~ 999999 범위의 숫자 생성
+        return String.valueOf(code);
+    }
+
+    // 인증코드 이메일로 전송
+    private void sendVerificationEmail(String toEmail, String verificationCode) {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setTo(toEmail);
+            helper.setSubject("회원가입 이메일 인증 코드");
+            helper.setText("인증 코드: " + verificationCode + "\n이 코드는 5분 동안 유효합니다.", false);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("이메일 발송 실패", e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> sendVerificationCode(String email) {
+
+         if(memberRepository.existsByEmail(email)) {
+             MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
+                     .canUse(false)
+                     .code(null)
+                     .build();
+
+             return ApiResponse.onSuccess(SuccessStatus._OK, response);
+         }
+
+        String verificationCode = generateVerificationCode(); // 인증 코드 생성
+        sendVerificationEmail(email, verificationCode); // 이메일 발송
+
+        MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
+                .canUse(true)
+                .code(verificationCode)
+                .build();
+
+        return ApiResponse.onSuccess(SuccessStatus._OK, response);
+
+    }
+
     @Transactional
     public ResponseEntity<ApiResponse<Object>> login(MemberDto.LoginRequestDto memberDto) {
         if (memberDto == null || memberDto.getEmail() == null || memberDto.getEmail().trim().isEmpty()) {

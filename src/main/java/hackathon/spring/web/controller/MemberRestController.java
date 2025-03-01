@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class MemberRestController {
     private final MemberService memberService;
@@ -63,6 +63,17 @@ public class MemberRestController {
     public ApiResponse<MemberDto.EmailResultDto> verifyCode(@RequestParam String email) {
         MemberDto.EmailResultDto response = memberService.sendVerificationCode(email);
         return ApiResponse.onSuccess(response);
+    }
+
+    @PostMapping("/email")
+    @Operation(
+            summary = "이메일 인증 API",
+            description = """
+              이메일로 인증번호를 받는 API입니다.
+                """
+    )
+    public ResponseEntity<ApiResponse> verifyCode(@RequestParam String email) {
+        return memberService.sendVerificationCode(email);
     }
 
     // 로그인
