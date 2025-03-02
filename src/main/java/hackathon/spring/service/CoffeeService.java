@@ -121,6 +121,7 @@ public class CoffeeService {
                 .map(CoffeeDto.CoffeePreviewDTO::fromEntity) // Coffee 엔티티에서 DTO 변환하는 메서드 필요
                 .collect(Collectors.toList());
 
+        //Recommendation에 넣기
         Coffee coffee = coffeeRepository.getOne(recommendedCoffees.get(0).getId());
 
         Recommendation recommendation = Recommendation.builder()
@@ -128,6 +129,9 @@ public class CoffeeService {
                 .coffee(coffee)
                 .build();
         recommendationRepository.save(recommendation);
+
+        //coffeedrinkcount에 넣기
+        coffeeRepository.add1DrinkCount(coffee.getId());
 
         return ResponseEntity.ok(ApiResponse.onSuccess(recommendedCoffees));
     }
