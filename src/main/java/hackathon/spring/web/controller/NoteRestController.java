@@ -2,6 +2,7 @@ package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Note;
+import hackathon.spring.service.MemberService;
 import hackathon.spring.service.NoteService;
 import hackathon.spring.web.dto.NoteDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,11 +19,12 @@ import org.springframework.web.bind.annotation.*;
 public class NoteRestController {
 
     private final NoteService noteService;
+    private final MemberService memberService;
 
     private Long extractMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
-        return noteService.getMemberIdByEmail(email); // 이메일을 기반으로 memberId 가져오기
+        return memberService.getMemberIdByEmail(email); // 이메일을 기반으로 memberId 가져오기
     }
 
     @GetMapping("")

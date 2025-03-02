@@ -35,11 +35,7 @@ public class NoteService {
     private final CoffeeRepository coffeeRepository;
 
 
-    public Long getMemberIdByEmail(String email) {
-        return memberRepository.findByEmail(email)
-                .map(Member::getId)  // Member 객체에서 ID 추출
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
-    }
+
 
     @Transactional
     public Note createNote(NoteDto.NewNoteDTO dto, Long memberId) {
