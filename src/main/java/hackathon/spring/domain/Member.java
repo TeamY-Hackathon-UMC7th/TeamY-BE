@@ -3,6 +3,9 @@ package hackathon.spring.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Setter
 @Getter
@@ -29,7 +32,13 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-//    @Column(nullable = false)
-//    private boolean notification;
+    // 연관관계: Member -> Note (Cascade 적용)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Note> notes = new ArrayList<>();
+
+    // 연관관계: Member -> Recommendation (Cascade 적용)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Recommendation> recommendations = new ArrayList<>();
+
 
 }
