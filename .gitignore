@@ -44,8 +44,10 @@ out/
 ### application.yml ###
 src/main/resources/application.yml
 ./application.yml
+./application-dev.yml
 # 프로젝트 내 모든 application.yml 무시
 **/application.yml
+**/application-dev.yml
 
 
 ./my-instance-key.pem
