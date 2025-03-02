@@ -39,14 +39,11 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final JavaMailSender mailSender;
 
-
-    // 닉네임 중복 가능해서 사용 X
-//    public ResponseEntity<ApiResponse> checkNickname(String nickname) {
-//        if (memberRepository.existsByNickname(nickname)) {
-//            return ResponseEntity.ok(ApiResponse.onSuccess("이미 사용중인 닉네임입니다."));
-//        }
-//        return ResponseEntity.ok(ApiResponse.onSuccess("사용 가능한 닉네임입니다."));
-//    }
+    public Long getMemberIdByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .map(Member::getId)  // Member 객체에서 ID 추출
+                .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
+    }
 
     private class PasswordValidator {
         private static final String PASSWORD_PATTERN =

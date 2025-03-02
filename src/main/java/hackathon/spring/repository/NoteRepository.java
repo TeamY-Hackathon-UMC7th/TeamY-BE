@@ -12,4 +12,5 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @EntityGraph(attributePaths = {"coffee"}) // 한 번의 쿼리로 Note + Coffee 조회
     List<Note> findByMemberId(Long memberId);
     Page<Note> findByMemberId(Long memberId, Pageable pageable);
+    Integer countByMemberId(Long memberId);
 }
