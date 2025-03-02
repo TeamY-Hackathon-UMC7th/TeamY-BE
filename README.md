@@ -76,9 +76,9 @@
 
 ## 🖥️ 프로젝트 구조
 
-### ERD 설계
+### ERD
+<img width="802" alt="image" src="https://github.com/user-attachments/assets/89ba9a2f-a3ee-4304-9b22-9158336a94f5" />
 
-<img width="874" alt="image" src="https://github.com/user-attachments/assets/ab38182f-0534-445d-817f-d5ab99b8bab4" />
 
 ### 인프라 구성도
 <img width="1201" alt="image" src="https://github.com/user-attachments/assets/b0b44c37-343c-437b-8fb0-0db3fe3f3989" />
