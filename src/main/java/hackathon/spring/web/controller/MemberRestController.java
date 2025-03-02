@@ -65,17 +65,6 @@ public class MemberRestController {
         return ApiResponse.onSuccess(response);
     }
 
-    @PostMapping("/email")
-    @Operation(
-            summary = "이메일 인증 API",
-            description = """
-              이메일로 인증번호를 받는 API입니다.
-                """
-    )
-    public ResponseEntity<ApiResponse> verifyCode(@RequestParam String email) {
-        return memberService.sendVerificationCode(email);
-    }
-
     // 로그인
     @PostMapping("/login")
     @Operation(
