@@ -55,7 +55,8 @@ jobs:
     - name: Check GitHub Runner Public IP
       run: curl ifconfig.me
 
-    - name: Deploy to Server
+    # 6. EC2 서버에 SSH로 접속하여 docker-compose를 통한 배포 수행
+    - name: Deploy to Server using docker-compose
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -63,9 +64,9 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
-          sudo docker ps -qa | xargs -r sudo docker rm -f
-          sudo docker logs $(sudo docker ps -l -q)
-          sudo docker pull ${{ secrets.DOCKERHUB_REPO }}:latest
-          sudo docker run -d -p 8080:8080 ${{ secrets.DOCKERHUB_REPO }}:latest
-          sudo docker image prune -f
-          
+          # 저장소가 EC2에 클론되어 있다고 가정
+          # cd /path/to/your/project
+          # docker-compose.yml 파일이 있는 디렉토리로 이동 후 이미지 갱신 및 컨테이너 재시작
+          sudo docker-compose pull
+          sudo docker-compose up -d
+
