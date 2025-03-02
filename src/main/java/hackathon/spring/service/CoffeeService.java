@@ -9,14 +9,18 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.apiPayload.code.status.SuccessStatus;
 import hackathon.spring.convertor.CoffeeConverter;
 import hackathon.spring.domain.Coffee;
+import hackathon.spring.domain.Member;
+import hackathon.spring.domain.Note;
+import hackathon.spring.domain.Recommendation;
 import hackathon.spring.domain.enums.Brand;
 import hackathon.spring.domain.uuid.Uuid;
 import hackathon.spring.domain.uuid.UuidRepository;
-import hackathon.spring.repository.CoffeeRecommendRepository;
 import hackathon.spring.repository.CoffeeRepository;
 //import hackathon.spring.s3.AmazonS3Manager;
+import hackathon.spring.repository.RecommendationRepository;
 import hackathon.spring.web.dto.CoffeeDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,13 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
+import java.util.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,12 +42,13 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = false)
 public class CoffeeService {
     private final CoffeeRepository coffeeRepository;
-    private final CoffeeRecommendRepository coffeeRecommendRepository;
+//    private final CoffeeRecommendRepository coffeeRecommendRepository;
 //    private final AmazonS3Manager s3Manager;
 //    private final UuidRepository uuidRepository;
 
     private final UuidRepository uuidRepository;
     private final CoffeeConverter coffeeConverter;
+    private final RecommendationRepository recommendationRepository;
 
 //    public Coffee addCoffee(String name, Brand brand,Integer sugar, Integer caffeine, Integer calories, Integer protein, MultipartFile coffeeImg) {
 //        // UUID 생성 및 저장
@@ -73,7 +75,7 @@ public class CoffeeService {
 //        return coffeeRepository.save(newCoffee);
 //    }
 
-    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> recommendByCaffeineLimit(String email, Integer userHourInput) {
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> recommendByCaffeineLimit(Member member, Integer userHourInput) {
         if (userHourInput == null) {
             throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
         }
@@ -119,8 +121,13 @@ public class CoffeeService {
                 .map(CoffeeDto.CoffeePreviewDTO::fromEntity) // Coffee 엔티티에서 DTO 변환하는 메서드 필요
                 .collect(Collectors.toList());
 
+        Coffee coffee = coffeeRepository.getOne(recommendedCoffees.get(0).getId());
 
-        coffeeRecommendRepository.saveRecentCoffee(email, recommendedCoffees.get(0));
+        Recommendation recommendation = Recommendation.builder()
+                .member(member)
+                .coffee(coffee)
+                .build();
+        recommendationRepository.save(recommendation);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(recommendedCoffees));
     }
@@ -157,11 +164,23 @@ public class CoffeeService {
         return new PageImpl<>(coffeeResponseDtos, pageable, coffees.getTotalElements());
     }
 
-    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees(String email) {
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees(Long memberId) {
         // 커피 목록 조회
-        List<CoffeeDto.CoffeePreviewDTO> recentRecommend5Coffees = coffeeRecommendRepository.getRecentRecommendedCoffees(email);
+        List<Recommendation> recentRecommend5Coffees = recommendationRepository.findTop5ByMemberIdOrderByCreatedAtDesc(memberId);
+        List<CoffeeDto.CoffeePreviewDTO> coffeePreviews = recentRecommend5Coffees.stream()
+                .map(CoffeeConverter::toPreviewDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeePreviews));
+    }
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(recentRecommend5Coffees));
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> getRecommendedCoffees(Long memberId, int page, int size) {
+        Pageable pageable = (Pageable) PageRequest.of(page, size);
+        // 커피 목록 조회
+        List<Recommendation> recentRecommendCoffees = recommendationRepository.findByMemberIdOrderByCreatedAtDesc(memberId, pageable);
+        List<CoffeeDto.CoffeePreviewDTO> coffeePreviews = recentRecommendCoffees.stream()
+                .map(CoffeeConverter::toPreviewDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeePreviews));
     }
 
 

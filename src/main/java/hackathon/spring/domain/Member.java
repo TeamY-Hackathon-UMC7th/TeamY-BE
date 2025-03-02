@@ -29,7 +29,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private boolean notification;
+//    @Column(nullable = false)
+//    private boolean notification;
 
 }
