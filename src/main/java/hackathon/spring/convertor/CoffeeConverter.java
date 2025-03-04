@@ -1,6 +1,7 @@
 package hackathon.spring.convertor;
 
 import hackathon.spring.domain.Coffee;
+import hackathon.spring.domain.Recommendation;
 import hackathon.spring.web.dto.CoffeeDto;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -36,5 +37,23 @@ public class CoffeeConverter {
                 .totalElements(coffees.getTotalElements())
                 .totalPage(coffees.getTotalPages())
                 .build();
+    }
+
+    public static CoffeeDto.CoffeePreviewDTO toPreviewDTO(Coffee coffee) {
+        return new CoffeeDto.CoffeePreviewDTO(
+                coffee.getId(),
+                coffee.getBrand().name(),
+                coffee.getName(),
+                coffee.getCoffeeImgUrl()
+        );
+    }
+
+    public static CoffeeDto.CoffeePreviewDTO toPreviewDTO(Recommendation recommendation) {
+        return new CoffeeDto.CoffeePreviewDTO(
+                recommendation.getCoffee().getId(),
+                recommendation.getCoffee().getBrand().name(),
+                recommendation.getCoffee().getName(),
+                recommendation.getCoffee().getCoffeeImgUrl()
+        );
     }
 }

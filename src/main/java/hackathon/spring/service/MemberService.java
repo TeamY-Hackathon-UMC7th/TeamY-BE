@@ -39,14 +39,11 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final JavaMailSender mailSender;
 
-
-    // 닉네임 중복 가능해서 사용 X
-//    public ResponseEntity<ApiResponse> checkNickname(String nickname) {
-//        if (memberRepository.existsByNickname(nickname)) {
-//            return ResponseEntity.ok(ApiResponse.onSuccess("이미 사용중인 닉네임입니다."));
-//        }
-//        return ResponseEntity.ok(ApiResponse.onSuccess("사용 가능한 닉네임입니다."));
-//    }
+    public Long getMemberIdByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .map(Member::getId)  // Member 객체에서 ID 추출
+                .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
+    }
 
     private class PasswordValidator {
         private static final String PASSWORD_PATTERN =
@@ -70,7 +67,7 @@ public class MemberService {
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse> signUp(MemberDto.JoinRequestDto memberDto) {
+    public MemberDto.JoinResultDto signUp(MemberDto.JoinRequestDto memberDto) {
 
         if (memberDto == null || memberDto.getEmail() == null || memberDto.getEmail().trim().isEmpty()) {
             throw new GeneralException(ErrorStatus._EMPTY_EMAIL);
@@ -105,7 +102,7 @@ public class MemberService {
                 .email(memberDto.getEmail())
                 .password(encodedPassword)
                 .nickname(nickname)
-                .notification(false)
+//                .notification(false)
                 .build();
         memberRepository.save(member);
 
@@ -114,7 +111,32 @@ public class MemberService {
                 .email(memberDto.getEmail())
                 .build();
 
-        return ApiResponse.onSuccess(SuccessStatus._OK, response);
+        return response;
+    }
+
+
+
+    public MemberDto.EmailResultDto sendVerificationCode(String email) {
+
+         if(memberRepository.existsByEmail(email)) {
+             MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
+                     .canUse(false)
+                     .code(null)
+                     .build();
+
+             return response;
+         }
+
+        String verificationCode = generateVerificationCode(); // 인증 코드 생성
+        sendVerificationEmail(email, verificationCode); // 이메일 발송
+
+        MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
+                .canUse(true)
+                .code(verificationCode)
+                .build();
+
+        return response;
+
     }
 
     // 인증코드 생성
@@ -138,28 +160,6 @@ public class MemberService {
         }
     }
 
-    public ResponseEntity<ApiResponse> sendVerificationCode(String email) {
-
-         if(memberRepository.existsByEmail(email)) {
-             MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
-                     .canUse(false)
-                     .code(null)
-                     .build();
-
-             return ApiResponse.onSuccess(SuccessStatus._OK, response);
-         }
-
-        String verificationCode = generateVerificationCode(); // 인증 코드 생성
-        sendVerificationEmail(email, verificationCode); // 이메일 발송
-
-        MemberDto.EmailResultDto response = MemberDto.EmailResultDto.builder()
-                .canUse(true)
-                .code(verificationCode)
-                .build();
-
-        return ApiResponse.onSuccess(SuccessStatus._OK, response);
-
-    }
 
     @Transactional
     public ResponseEntity<ApiResponse<Object>> login(MemberDto.LoginRequestDto memberDto) {
@@ -337,13 +337,11 @@ public class MemberService {
         return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "닉네임이 변경되었습니다.");
     }
 
-    @Transactional
-    public ApiResponse<String> notifyAlarm(Boolean notification, Long userId) {
-        Member member = memberRepository.findById(userId).get();
-        member.setNotification(notification);
-        memberRepository.save(member);
-        return ApiResponse.onSuccess("알림 설정에 성공하였습니다. 알림 설정: " + notification);
-    }
-
-
+//    @Transactional
+//    public ApiResponse<String> notifyAlarm(Boolean notification, Long userId) {
+//        Member member = memberRepository.findById(userId).get();
+//        member.setNotification(notification);
+//        memberRepository.save(member);
+//        return ApiResponse.onSuccess("알림 설정에 성공하였습니다. 알림 설정: " + notification);
+//    }
 }

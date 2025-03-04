@@ -3,6 +3,7 @@ package hackathon.spring.service;
 import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.apiPayload.exception.Handler.NoteHandler;
+import hackathon.spring.convertor.CoffeeConverter;
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.Member;
 import hackathon.spring.domain.Note;
@@ -34,56 +35,18 @@ public class NoteService {
     private final MemberRepository memberRepository;
     private final CoffeeRepository coffeeRepository;
 
-
-    public Long getMemberIdByEmail(String email) {
-        return memberRepository.findByEmail(email)
-                .map(Member::getId)  // Member 객체에서 ID 추출
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
-    }
-
     @Transactional
     public Note createNote(NoteDto.NewNoteDTO dto, Long memberId) {
         // 1️⃣ 입력값 검증 (비어있는 값 확인)
-        if (dto.getDrinkDate() == null || dto.getSleepDate() == null) {
+        if (dto.getDrinkDateTime() == null || dto.getSleepDateTime() == null) {
             throw new GeneralException(ErrorStatus._EMPTY_TIME_INPUT);
         }
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        // ✅ 날짜 파싱 (YYYY-MM-DD)
-        LocalDate writeDate;
-        LocalDate drinkDateOnly;
-        LocalDate sleepDateOnly;
-
-        try {
-            writeDate = LocalDate.parse(dto.getWriteDate(), dateFormatter);
-            drinkDateOnly = LocalDate.parse(dto.getDrinkDate(), dateFormatter);
-            sleepDateOnly = LocalDate.parse(dto.getSleepDate(), dateFormatter);
-        } catch (DateTimeParseException e) {
-            throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
-        }
-
-        // ✅ 시간, 분을 정수로 변환
-        int drinkHour, drinkMinute, sleepHour, sleepMinute;
-        try {
-            drinkHour = Integer.parseInt(dto.getDrinkHour());
-            drinkMinute = Integer.parseInt(dto.getDrinkMinute());
-            sleepHour = Integer.parseInt(dto.getSleepHour());
-            sleepMinute = Integer.parseInt(dto.getSleepMinute());
-        } catch (NumberFormatException e) {
-            throw new GeneralException(ErrorStatus._INVALID_TIME_FORMAT);
-        }
-
-        // ✅ LocalDateTime으로 변환
-        LocalDateTime drinkDate = drinkDateOnly.atTime(drinkHour, drinkMinute);
-        LocalDateTime sleepDate = sleepDateOnly.atTime(sleepHour, sleepMinute);
-
-
-        // 3️⃣ Member 존재 여부 확인
+        // 2️⃣ Member 존재 여부 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_REGISTERED_USER));
 
-        // 4️⃣ Coffee 존재 여부 확인
+        // 3️⃣ Coffee 존재 여부 확인
         Coffee coffee = coffeeRepository.findById(dto.getCoffeeId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._COFFEE_NOT_FOUND));
 
@@ -91,12 +54,10 @@ public class NoteService {
         Note note = Note.builder()
                 .member(member)
                 .coffee(coffee)
-                .writeDate(writeDate)  // LocalDate
-                .drinkDate(drinkDate)  // LocalDateTime
-                .sleepDate(sleepDate)  // LocalDateTime
+                .drinkDateTime(dto.getDrinkDateTime())  // 그대로 사용
+                .sleepDateTime(dto.getSleepDateTime())  // 그대로 사용
                 .review(dto.getReview())
                 .build();
-
 
         noteRepository.save(note);
         coffee.setDrinkCount(coffee.getDrinkCount() + 1);
@@ -131,16 +92,13 @@ public class NoteService {
         List<NoteDto.NotePreviewDTO> notePreviews = notes.stream()
                 .map(note -> new NoteDto.NotePreviewDTO(
                         note.getId(),
-                        new CoffeeDto.CoffeePreviewDTO(
-                                note.getCoffee().getBrand().name(),
-                                note.getCoffee().getName(),
-                                note.getCoffee().getCoffeeImgUrl()
-                        ),
-                        note.getWriteDate().toString(),
-                        note.getDrinkDate().getHour(),
-                        note.getSleepDate().getHour()
+                        CoffeeConverter.toPreviewDTO(note.getCoffee()),
+                        note.getWriteDateTime().toLocalDate().toString(),
+                        note.getDrinkDateTime().getHour(),
+                        note.getSleepDateTime().getHour()
                 ))
                 .collect(Collectors.toList());
+
 
         // ✅ 페이지 정보 포함하여 DTO 생성
         return new NoteDto.GetAllNotesDTO(
@@ -160,14 +118,10 @@ public class NoteService {
         }
 
         return new NoteDto.NoteDTO(
-                new CoffeeDto.CoffeePreviewDTO(
-                        note.getCoffee().getBrand().name(),
-                        note.getCoffee().getName(),
-                        note.getCoffee().getCoffeeImgUrl()
-                ),
-                note.getWriteDate().toString(),
-                note.getDrinkDate().toString(),
-                note.getSleepDate().toString(),
+                CoffeeConverter.toPreviewDTO(note.getCoffee()),
+                note.getWriteDateTime().toString(),
+                note.getDrinkDateTime().toString(),
+                note.getSleepDateTime().toString(),
                 note.getReview()
         );
     }

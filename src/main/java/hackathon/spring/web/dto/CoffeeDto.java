@@ -32,12 +32,14 @@ public class CoffeeDto {
     @AllArgsConstructor
     @Builder
     public static class CoffeePreviewDTO {
+        private Long id;
         private String brand;
         private String coffeeName;
         private String coffeeImgUrl;
 
         public static CoffeePreviewDTO fromEntity(Coffee coffee) {
             return CoffeePreviewDTO.builder()
+                    .id(coffee.getId())
                     .coffeeName(coffee.getName())
                     .brand(coffee.getBrand().name()) // Enum 변환
                     .coffeeImgUrl(coffee.getCoffeeImgUrl())

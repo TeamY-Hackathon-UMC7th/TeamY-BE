@@ -4,8 +4,10 @@ import hackathon.spring.apiPayload.ApiResponse;
 import hackathon.spring.domain.Member;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.MemberService;
+import hackathon.spring.service.MyPageService;
 import hackathon.spring.service.NoteService;
 import hackathon.spring.web.dto.MemberDto;
+import hackathon.spring.web.dto.NoteDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,26 +23,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class MemberRestController {
     private final MemberService memberService;
+    private final MyPageService myPageService;
     private final MemberRepository memberRepository;
     private final NoteService noteService;
 
-    // 닉네임 중복 체크
-//    @GetMapping("/check/{nickname}")
-//    @Operation(
-//            summary = "닉네임 중복 체크 API",
-//            description = """
-//             닉네임 중복을 체크하는 API입니다.
-//                """
-//    )
-//    public ResponseEntity<ApiResponse> checkNickname(@PathVariable String nickname) {
-//        return memberService.checkNickname(nickname);
-//    }
+
 
     // 회원가입
     @PostMapping("/join")
@@ -50,8 +42,9 @@ public class MemberRestController {
               닉네임으로 회원가입하는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse> signUp(@RequestBody MemberDto.JoinRequestDto memberDto) {
-        return memberService.signUp(memberDto);
+    public ApiResponse<MemberDto.JoinResultDto> signUp(@RequestBody MemberDto.JoinRequestDto memberDto) {
+        MemberDto.JoinResultDto response = memberService.signUp(memberDto);
+        return ApiResponse.onSuccess(response);
     }
 
     @PostMapping("/email")
@@ -61,8 +54,9 @@ public class MemberRestController {
               이메일로 인증번호를 받는 API입니다.
                 """
     )
-    public ResponseEntity<ApiResponse> verifyCode(@RequestParam String email) {
-        return memberService.sendVerificationCode(email);
+    public ApiResponse<MemberDto.EmailResultDto> verifyCode(@RequestParam String email) {
+        MemberDto.EmailResultDto response = memberService.sendVerificationCode(email);
+        return ApiResponse.onSuccess(response);
     }
 
     // 로그인
@@ -121,21 +115,21 @@ public class MemberRestController {
         return memberService.updatePassword(passwordDto);
     }
 
-    // 알림 동의
-    @PostMapping("/alarm/{notification}")
-    @Operation(
-            summary = "알림 동의 API",
-            description = """
-              알림 동의여부를 체크하는 API입니다.
-                """
-    )
-    public ApiResponse<String> notifyAlarm(@PathVariable Boolean notification) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
-        Long userId = noteService.getMemberIdByEmail(email);
-
-        return memberService.notifyAlarm(notification, userId);
-    }
+//    // 알림 동의
+//    @PostMapping("/alarm/{notification}")
+//    @Operation(
+//            summary = "알림 동의 API",
+//            description = """
+//              알림 동의여부를 체크하는 API입니다.
+//                """
+//    )
+//    public ApiResponse<String> notifyAlarm(@PathVariable Boolean notification) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
+//        Long userId = noteService.getMemberIdByEmail(email);
+//
+//        return memberService.notifyAlarm(notification, userId);
+//    }
 
     @PostMapping("/nickname/update")
     @Operation(
@@ -147,6 +141,8 @@ public class MemberRestController {
     public ResponseEntity<ApiResponse> updateNickname(@RequestParam String nickname) {
         return memberService.updateNickname(nickname);
     }
+
+
 
     @GetMapping("/user")
     @Operation(

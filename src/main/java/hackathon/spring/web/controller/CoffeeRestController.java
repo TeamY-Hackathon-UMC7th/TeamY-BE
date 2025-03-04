@@ -1,10 +1,15 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.apiPayload.code.status.ErrorStatus;
+import hackathon.spring.apiPayload.exception.GeneralException;
 import hackathon.spring.convertor.CoffeeConverter;
 import hackathon.spring.domain.Coffee;
+import hackathon.spring.domain.Member;
 import hackathon.spring.domain.enums.Brand;
+import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.CoffeeService;
+import hackathon.spring.service.MemberService;
 import io.swagger.v3.oas.annotations.Parameter;
 import hackathon.spring.web.dto.CoffeeDto;
 import hackathon.spring.web.dto.MemberDto;
@@ -32,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,6 +45,8 @@ import java.util.List;
 @RequestMapping("/coffee")
 public class CoffeeRestController {
     private final CoffeeService coffeeService;
+    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     private String extractMemberEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -72,7 +80,9 @@ public class CoffeeRestController {
     )
     public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> recommendCoffees(@RequestParam("time") @Max(24)Integer time) {
         String email = extractMemberEmail();
-        return coffeeService.recommendByCaffeineLimit(email, time);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_REGISTERED_USER));
+        return coffeeService.recommendByCaffeineLimit(member, time);
     }
 
     @GetMapping("/popular")
@@ -102,18 +112,34 @@ public class CoffeeRestController {
         return ApiResponse.onSuccess(CoffeeConverter.toCoffeeListDto(coffeePage));
     }
 
-    @GetMapping("/recent")
+    @GetMapping("/recommended/recent5")
     @Operation(
-            summary = "최근 추천받음 음료 API",
+            summary = "최근 추천받은 음료 5개 API",
             description = """
-             최근 추천받음 음료를 보여주는 API입니다.
+             최근 추천받은 음료 5개를 보여주는 API입니다.
                 """
     )
     public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees() {
         String email = extractMemberEmail();
-        return coffeeService.get5RecentRecommendedCoffees(email);
+        Long id = memberService.getMemberIdByEmail(email);
+        return coffeeService.get5RecentRecommendedCoffees(id);
     }
 
+    @GetMapping("recommended/all")
+    @Operation(
+            summary = "추천받은 음료 전부 보여주는 API",
+            description = """
+             사용자가 지금까지 추천받은 음료를 모두 최신순으로 보여주는 API입니다.
+                """
+    )
+    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> getRecommendedCoffees(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        String email = extractMemberEmail();
+        Long id = memberService.getMemberIdByEmail(email);
+        return coffeeService.getRecommendedCoffees(id, page, size);
+    }
 
 
 }

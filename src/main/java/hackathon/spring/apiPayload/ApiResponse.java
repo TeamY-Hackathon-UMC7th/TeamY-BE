@@ -17,8 +17,8 @@ public class ApiResponse<T> {
 
     @JsonProperty("isSuccess")
     private final Boolean isSuccess;
-    private final String code;
-    private final String message;
+    private final String code; //API의 상태 코드(응답 코드)
+    private final String message; //API 응답에 대한 설명 메시지
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
 

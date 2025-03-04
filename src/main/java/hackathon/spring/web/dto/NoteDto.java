@@ -1,13 +1,17 @@
 package hackathon.spring.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -69,26 +73,13 @@ public class NoteDto {
     @AllArgsConstructor
     @Builder
     public static class NewNoteDTO {
-        @Schema(example = "2025-02-17", description = "YYYY-MM-DD 형식의 작성 날짜")
-        private String writeDate;
+        @Schema(example = "2025-02-17 13:30", description = "마신 날짜와 시간 (YYYY-MM-DD HH:mm) 형식")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+        private LocalDateTime drinkDateTime;
 
-        @Schema(example = "2025-02-17", description = "YYYY-MM-DD 형식의 마신 날짜")
-        private String drinkDate;
-
-        @Schema(example = "13", description = "마신 시간 (HH)")
-        private String drinkHour;
-
-        @Schema(example = "30", description = "마신 분 (mm)")
-        private String drinkMinute;
-
-        @Schema(example = "2025-02-17", description = "YYYY-MM-DD 형식의 수면 날짜")
-        private String sleepDate;
-
-        @Schema(example = "23", description = "수면 시간 (HH)")
-        private String sleepHour;
-
-        @Schema(example = "45", description = "수면 분 (mm)")
-        private String sleepMinute;
+        @Schema(example = "2025-02-17 23:45", description = "수면 날짜와 시간 (YYYY-MM-DD HH:mm) 형식")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+        private LocalDateTime sleepDateTime;
 
         private String review;
         private Long coffeeId;
