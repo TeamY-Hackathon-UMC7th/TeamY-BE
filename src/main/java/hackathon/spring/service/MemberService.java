@@ -13,6 +13,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -45,20 +46,14 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
     }
 
-    public MemberDto.LoginResultDto kakaoLogin(MemberDto.KakaoRequestDto kakaoRequestDto) {
-        String kakaoName = null;
-        String kakaoEmail = null;
-        if(kakaoRequestDto != null) {
-            kakaoName = kakaoRequestDto.getKakaoName();
-            kakaoEmail = kakaoRequestDto.getKakaoEmail();
-        } else {
-            if(kakaoName == null) {
-                throw new GeneralException(ErrorStatus._USERNAME_NOT_FOUND);
-            }
-            if(kakaoEmail == null) {
-                throw new GeneralException(ErrorStatus._EMAIL_NOT_FOUND);
-            }
+    public ResponseEntity<ApiResponse<MemberDto.LoginResultDto>> kakaoLogin(MemberDto.KakaoRequestDto kakaoRequestDto) {
+        if(kakaoRequestDto == null) {
+            throw new GeneralException(ErrorStatus._REQUEST_BODY_NOT_FOUND);
         }
+
+        String kakaoName = kakaoRequestDto.getKakaoName();
+        String kakaoEmail = kakaoRequestDto.getKakaoEmail();
+
         Optional<Member> existData = memberRepository.findByEmail(kakaoEmail);
 
         Member member;
@@ -75,20 +70,20 @@ public class MemberService {
         String accessToken = jwtTokenProvider.generateAccessToken(member.getEmail());
         String refreshToken = jwtTokenProvider.generateRefreshToken(member.getEmail());
 
-        // Set-Cookie 헤더로 토큰 저장
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .secure(true)  // HTTPS 환경에서만
-                .path("/")
-                .maxAge(jwtTokenProvider.getAccessTokenExpiration() / 1000)
-                .build();
-
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
-                .build();
+//        // Set-Cookie 헤더로 토큰 저장
+//        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+//                .httpOnly(true)
+//                .secure(true)  // HTTPS 환경에서만
+//                .path("/")
+//                .maxAge(jwtTokenProvider.getAccessTokenExpiration() / 1000)
+//                .build();
+//
+//        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+//                .httpOnly(true)
+//                .secure(true)
+//                .path("/")
+//                .maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
+//                .build();
 
         MemberDto.LoginResultDto response = MemberDto.LoginResultDto.builder()
                 .id(member.getId())
@@ -100,11 +95,12 @@ public class MemberService {
                 .refreshTokenExpiresIn(jwtTokenProvider.getRefreshTokenExpiration())
                 .build();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+//        headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-        return ApiResponse.onSuccess(response).getResult();
+        return ResponseEntity.ok()
+                .body(ApiResponse.onSuccess(response));
     }
 
 

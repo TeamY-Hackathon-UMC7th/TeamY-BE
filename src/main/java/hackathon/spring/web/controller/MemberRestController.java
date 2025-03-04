@@ -1,6 +1,9 @@
 package hackathon.spring.web.controller;
 
 import hackathon.spring.apiPayload.ApiResponse;
+import hackathon.spring.apiPayload.code.status.SuccessStatus;
+import hackathon.spring.apiPayload.exception.GeneralException;
+import hackathon.spring.apiPayload.exception.Handler.NoteHandler;
 import hackathon.spring.domain.Member;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.service.MemberService;
@@ -42,9 +45,8 @@ public class MemberRestController {
             카카오 로그인 API입니다.
             """
     )
-    public ApiResponse<MemberDto.LoginResultDto> kakaoLogin(@RequestBody MemberDto.KakaoRequestDto kakaoDto) {
-        MemberDto.LoginResultDto response = memberService.kakaoLogin(kakaoDto);
-        return ApiResponse.onSuccess(response);
+    public ResponseEntity<ApiResponse<MemberDto.LoginResultDto>> kakaoLogin(@RequestBody MemberDto.KakaoRequestDto kakaoDto) {
+        return memberService.kakaoLogin(kakaoDto);
     }
 
     // 회원가입
@@ -128,21 +130,6 @@ public class MemberRestController {
 //        return memberService.updatePassword(passwordDto);
 //    }
 
-//    // 알림 동의
-//    @PostMapping("/alarm/{notification}")
-//    @Operation(
-//            summary = "알림 동의 API",
-//            description = """
-//              알림 동의여부를 체크하는 API입니다.
-//                """
-//    )
-//    public ApiResponse<String> notifyAlarm(@PathVariable Boolean notification) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String email = authentication.getName(); // JWT에서 추출된 사용자 이메일 또는 ID
-//        Long userId = noteService.getMemberIdByEmail(email);
-//
-//        return memberService.notifyAlarm(notification, userId);
-//    }
 
     @PatchMapping("/nickname/update")
     @Operation(
