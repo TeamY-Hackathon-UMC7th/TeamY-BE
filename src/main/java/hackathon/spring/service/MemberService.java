@@ -45,6 +45,69 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
     }
 
+    public MemberDto.LoginResultDto kakaoLogin(MemberDto.KakaoRequestDto kakaoRequestDto) {
+        String kakaoName = null;
+        String kakaoEmail = null;
+        if(kakaoRequestDto != null) {
+            kakaoName = kakaoRequestDto.getKakaoName();
+            kakaoEmail = kakaoRequestDto.getKakaoEmail();
+        } else {
+            if(kakaoName == null) {
+                throw new GeneralException(ErrorStatus._USERNAME_NOT_FOUND);
+            }
+            if(kakaoEmail == null) {
+                throw new GeneralException(ErrorStatus._EMAIL_NOT_FOUND);
+            }
+        }
+        Optional<Member> existData = memberRepository.findByEmail(kakaoEmail);
+
+        Member member;
+        if(existData.isEmpty()){
+            member = Member.createOAuthMember(kakaoName, kakaoEmail);
+            System.out.println("첫 로그인");
+        }
+        else {
+            member = existData.get();
+            System.out.println("기존 유저");
+        }
+        memberRepository.save(member);
+
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getEmail());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(member.getEmail());
+
+        // Set-Cookie 헤더로 토큰 저장
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)  // HTTPS 환경에서만
+                .path("/")
+                .maxAge(jwtTokenProvider.getAccessTokenExpiration() / 1000)
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
+                .build();
+
+        MemberDto.LoginResultDto response = MemberDto.LoginResultDto.builder()
+                .id(member.getId())
+                .nickName(member.getNickname())
+                .email(member.getEmail())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .accessTokenExpiresIn(jwtTokenProvider.getAccessTokenExpiration())
+                .refreshTokenExpiresIn(jwtTokenProvider.getRefreshTokenExpiration())
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ApiResponse.onSuccess(response).getResult();
+    }
+
+
     private class PasswordValidator {
         private static final String PASSWORD_PATTERN =
                 "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$";
@@ -100,7 +163,6 @@ public class MemberService {
 
         Member member = Member.builder()
                 .email(memberDto.getEmail())
-                .password(encodedPassword)
                 .nickname(nickname)
 //                .notification(false)
                 .build();
@@ -170,9 +232,7 @@ public class MemberService {
         Member member = memberRepository.findByEmail(memberDto.getEmail())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(memberDto.getPassword(), member.getPassword())) {
-            throw new GeneralException(ErrorStatus._INVALID_PASSWORD);
-        }
+
 
         String accessToken = jwtTokenProvider.generateAccessToken(member.getEmail());
         String refreshToken = jwtTokenProvider.generateRefreshToken(member.getEmail());
@@ -282,40 +342,6 @@ public class MemberService {
                 .body(ApiResponse.onSuccess(SuccessStatus._OK, response).getBody());
     }
 
-    @Transactional
-    public ResponseEntity<ApiResponse> updatePassword(MemberDto.PasswordChangeRequestDto passwordDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        String storedPassword = member.getPassword(); // DB에 저장된 해싱된 비밀번호
-        String currentPassword = passwordDto.getCurrentPassword();
-        String updatePassword = passwordDto.getUpdatePassword();
-
-        // 입력한 비밀번호와 비교
-        if(!passwordEncoder.matches(currentPassword, storedPassword)){
-            throw new GeneralException(ErrorStatus._INVALID_PASSWORD);
-        }
-        if (passwordEncoder.matches(updatePassword, storedPassword)) {
-            throw new GeneralException(ErrorStatus._NOT_CHANGE_PASSWORD);
-        }
-
-        if (!PasswordValidator.isValidPassword(updatePassword)) {
-            throw new GeneralException(ErrorStatus._INVALID_PASSWORD_FORMAT);
-        }
-
-        if(!Objects.equals(passwordDto.getCheckPassword(), updatePassword)){
-            throw new GeneralException(ErrorStatus._NOT_MATCH_PASSWORD);
-        }
-
-        String encodedPassword = passwordEncoder.encode(updatePassword);
-
-        member.setPassword(encodedPassword);
-
-        return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "비밀번호가 변경되었습니다.");
-    }
 
     @Transactional
     public ResponseEntity<ApiResponse> updateNickname(String nickname) {
@@ -337,11 +363,4 @@ public class MemberService {
         return ApiResponse.onSuccess(SuccessStatus._OK, (Object) "닉네임이 변경되었습니다.");
     }
 
-//    @Transactional
-//    public ApiResponse<String> notifyAlarm(Boolean notification, Long userId) {
-//        Member member = memberRepository.findById(userId).get();
-//        member.setNotification(notification);
-//        memberRepository.save(member);
-//        return ApiResponse.onSuccess("알림 설정에 성공하였습니다. 알림 설정: " + notification);
-//    }
 }

@@ -1,6 +1,5 @@
 package hackathon.spring.web.dto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -11,6 +10,34 @@ import lombok.NoArgsConstructor;
 
 
 public class MemberDto {
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KakaoRequestDto {
+
+        @NotNull
+        @NotBlank
+        private String kakaoName;
+
+        @NotNull
+        @NotBlank
+        private String kakaoEmail;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KakaoResponseDto {
+
+        private Long id;
+        private String nickName;
+    }
+
+
+
     @Builder
     @Getter
     @NoArgsConstructor
@@ -76,6 +103,7 @@ public class MemberDto {
     public static class LoginResultDto {
 
         private Long id;
+        private String nickName;
         private String email;
         private String accessToken;
         private String refreshToken;

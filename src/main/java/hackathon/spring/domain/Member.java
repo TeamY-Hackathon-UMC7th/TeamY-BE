@@ -22,15 +22,9 @@ public class Member {
     @Column(nullable = false)
     private String email;
 
-    // 비밀번호 해싱
     @Setter
     @Column(columnDefinition = "VARCHAR(10)")
     private String nickname;
-
-    // 비밀번호 해싱
-    @Setter
-    @Column(nullable = false)
-    private String password;
 
     // 연관관계: Member -> Note (Cascade 적용)
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -40,5 +34,12 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recommendation> recommendations = new ArrayList<>();
 
+
+    public static Member createOAuthMember(String username, String email) {
+        return Member.builder()
+                .nickname(username)
+                .email(email) // email 값을 claims에서 추출
+                .build();
+    }
 
 }

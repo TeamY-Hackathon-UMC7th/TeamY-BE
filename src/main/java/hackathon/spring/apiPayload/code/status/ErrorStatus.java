@@ -21,6 +21,10 @@ public enum ErrorStatus implements BaseErrorCode {
     //로그인 관련 응답
     _INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "LOGIN4001", "유효하지 않은 토큰입니다."),
     _LOGOUT_TOKEN(HttpStatus.UNAUTHORIZED, "LOGIN4002", "로그아웃 처리된 토큰입니다."),
+    _USERNAME_NOT_FOUND(HttpStatus.NOT_FOUND, "LOGIN4003", "사용자 이름을 찾을 수 없습니다."),
+    _EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "LOGIN4004", "사용자 이메일을 찾을 수 없습니다."),
+    _NICKNAME_NOT_FOUND(HttpStatus.NOT_FOUND, "LOGIN4005", "사용자 닉네임을 찾을 수 없습니다."),
+
 
     //멤버 관련 응답
     _DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "MEMBER409", "이미 사용 중인 닉네임입니다."),
