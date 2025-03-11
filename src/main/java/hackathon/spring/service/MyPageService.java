@@ -1,5 +1,6 @@
 package hackathon.spring.service;
 
+import hackathon.spring.apiPayload.code.status.ErrorStatus;
 import hackathon.spring.domain.Member;
 import hackathon.spring.repository.MemberRepository;
 import hackathon.spring.repository.NoteRepository;
@@ -17,7 +18,7 @@ public class MyPageService {
     public String getMemberNicknameByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .map(Member::getNickname)  // Member 객체에서 닉네임 추출
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException(String.valueOf(ErrorStatus._MEMBER_NOT_FOUND)));
     }
 
     // 커피기록개수 get

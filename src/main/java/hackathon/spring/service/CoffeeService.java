@@ -142,7 +142,7 @@ public class CoffeeService {
 
         // 데이터가 없을 경우 예외 처리
         if (CollectionUtils.isEmpty(topDrinks)) {
-            throw new NoSuchElementException("커피 데이터가 존재하지 않습니다.");
+            throw new GeneralException(ErrorStatus._NOT_FOUND);
         }
 
         // Coffee -> CoffeePreviewDTO 변환
@@ -168,13 +168,13 @@ public class CoffeeService {
         return coffees;
     }
 
-    public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees(Long memberId) {
+    public List<CoffeeDto.CoffeePreviewDTO> get5RecentRecommendedCoffees(Long memberId) {
         // 커피 목록 조회
         List<Recommendation> recentRecommend5Coffees = recommendationRepository.findTop5ByMemberIdOrderByCreatedAtDesc(memberId);
         List<CoffeeDto.CoffeePreviewDTO> coffeePreviews = recentRecommend5Coffees.stream()
                 .map(CoffeeConverter::toPreviewDTO)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.onSuccess(coffeePreviews));
+        return coffeePreviews;
     }
 
     public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> getRecommendedCoffees(Long memberId, int page, int size) {
@@ -188,6 +188,12 @@ public class CoffeeService {
     }
 
 
-
-
+    public ResponseEntity<ApiResponse<CoffeeDto.CoffeeResponseDto>> getCoffeeInfo(Long coffeeId) {
+        Coffee coffee = coffeeRepository.findCoffeeById(coffeeId);
+        if (coffee == null) {
+            throw new GeneralException(ErrorStatus._COFFEE_NOT_FOUND);
+        }
+        CoffeeDto.CoffeeResponseDto coffeeResponseDto = CoffeeConverter.toCoffeeDto(coffee);
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeResponseDto));
+    }
 }

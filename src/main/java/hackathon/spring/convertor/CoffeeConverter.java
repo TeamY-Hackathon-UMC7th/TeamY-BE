@@ -39,6 +39,8 @@ public class CoffeeConverter {
                 .build();
     }
 
+
+
     public static CoffeeDto.CoffeePreviewDTO toPreviewDTO(Coffee coffee) {
         return new CoffeeDto.CoffeePreviewDTO(
                 coffee.getId(),
