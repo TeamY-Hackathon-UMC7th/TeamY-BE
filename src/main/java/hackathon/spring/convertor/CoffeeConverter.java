@@ -31,11 +31,11 @@ public class CoffeeConverter {
 
         return CoffeeDto.CoffeeListResponseDto.builder()
                 .coffeeResponseDtos(coffeeDtos)
-                .isFirst(coffees.isFirst())
-                .isLast(coffees.isLast())
-                .listSize(coffeeDtos.size())
-                .totalElements(coffees.getTotalElements())
-                .totalPage(coffees.getTotalPages())
+//                .isFirst(coffees.isFirst())
+//                .isLast(coffees.isLast())
+//                .listSize(coffeeDtos.size())
+//                .totalElements(coffees.getTotalElements())
+//                .totalPage(coffees.getTotalPages())
                 .build();
     }
 
