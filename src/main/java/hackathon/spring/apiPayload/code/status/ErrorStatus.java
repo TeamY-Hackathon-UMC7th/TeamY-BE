@@ -44,16 +44,21 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //리뷰 관련 응답
     _NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTE404", "존재하지 않는 리뷰입니다."),
-    _NOTE_NOT_EXIST(HttpStatus.NOT_FOUND, "NOTE404", "해당 사용자가 리뷰를 작성하지 않았습니다."),
+    _NOTE_NOT_EXIST(HttpStatus.NOT_FOUND, "NOTE404", "해당 사용자가 해당 리뷰를 작성하지 않았습니다."),
     _NOTE_WRONG_INPUT(HttpStatus.BAD_REQUEST, "NOTE400", "입력된 노트의 형식이 잘못 되었습니다."),
 
     //시간 관련 응답
     _EMPTY_TIME_INPUT(HttpStatus.BAD_REQUEST, "TIME400", "시간을 입력해야 합니다."),
     _INVALID_TIME_FORMAT(HttpStatus.UNPROCESSABLE_ENTITY, "TIME422", "24시 형태로 입력해주세요."),
 
+    //페이지 관련 응답
+    _INVALID_PAGE_INPUT(HttpStatus.UNPROCESSABLE_ENTITY, "TIME422", "페이지 범위(양수)로 입력해주세요."),
 
     //토큰 관련 응답
     _NEED_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN401", "로그인이 되지 않았습니다."),
+
+    //추천 관련 응답
+    _NOT_MATCH_COFFEE(HttpStatus.UNAUTHORIZED, "RECOMMEND404", "조건에 맞는 커피가 존재하지 않습니다."),
 
     //커피 관련 응답
     _COFFEE_NOT_FOUND(HttpStatus.NOT_FOUND, "COFFEE404", "존재하지 않는 커피입니다.");

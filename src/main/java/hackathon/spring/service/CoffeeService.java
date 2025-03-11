@@ -121,6 +121,11 @@ public class CoffeeService {
                 .map(CoffeeDto.CoffeePreviewDTO::fromEntity) // Coffee 엔티티에서 DTO 변환하는 메서드 필요
                 .collect(Collectors.toList());
 
+        // 추천 커피가 하나도 없으면 예외 처리
+        if (recommendedCoffees.isEmpty()) {
+            throw new GeneralException(ErrorStatus._NOT_MATCH_COFFEE);
+        }
+
         //Recommendation에 넣기
         Coffee coffee = coffeeRepository.getOne(recommendedCoffees.get(0).getId());
 
@@ -158,7 +163,7 @@ public class CoffeeService {
         Page<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
 
         if (coffees == null || coffees.isEmpty()) {
-            throw new CoffeeServiceException(ErrorStatus._COFFEE_NOT_FOUND);
+            throw new GeneralException(ErrorStatus._COFFEE_NOT_FOUND);
         }
 
 //        List<CoffeeDto.CoffeeResponseDto> coffeeResponseDtos = coffees.stream()

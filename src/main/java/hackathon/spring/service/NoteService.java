@@ -73,7 +73,7 @@ public class NoteService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOTE_NOT_FOUND));
 
         if (note.getMember().getId()!=memberId) {
-            throw new GeneralException(ErrorStatus._UNAUTHORIZED); // 권한 없음 예외
+            throw new GeneralException(ErrorStatus._NOTE_NOT_EXIST); // 권한 없음 예외
         }
 
         noteRepository.delete(note);
@@ -82,6 +82,9 @@ public class NoteService {
 
     @Transactional(readOnly = true)
     public NoteDto.GetAllNotesDTO getAllNotes(Long memberId, int page, int size) {
+        if(page < 0)
+            throw new GeneralException(ErrorStatus._INVALID_PAGE_INPUT);
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_REGISTERED_USER));
 
@@ -116,7 +119,7 @@ public class NoteService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOTE_NOT_FOUND));
 
         if (note.getMember().getId()!=memberId) {
-            throw new GeneralException(ErrorStatus._UNAUTHORIZED);
+            throw new GeneralException(ErrorStatus._NOTE_NOT_EXIST);
         }
 
         return new NoteDto.NoteDTO(

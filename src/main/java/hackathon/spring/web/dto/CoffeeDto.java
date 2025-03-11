@@ -93,10 +93,10 @@ public class CoffeeDto {
     @AllArgsConstructor
     public static class CoffeeListResponseDto {
         private List<CoffeeResponseDto> coffeeResponseDtos;
-        private Integer listSize;
-        private Integer totalPage;
-        private Long totalElements;
-        private Boolean isFirst;
-        private Boolean isLast;
+//        private Integer listSize;
+//        private Integer totalPage;
+//        private Long totalElements;
+//        private Boolean isFirst;
+//        private Boolean isLast;
     }
 }
