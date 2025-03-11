@@ -2,6 +2,7 @@ package hackathon.spring.repository;
 
 import hackathon.spring.domain.Coffee;
 import hackathon.spring.domain.enums.Brand;
+import hackathon.spring.web.dto.CoffeeDto;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,4 +33,5 @@ public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
     @Query("UPDATE Coffee c SET c.drinkCount = c.drinkCount + 1 WHERE c.id = :id")
     void add1DrinkCount(@Param("id") Long id);
 
+    Coffee findCoffeeById(Long coffeeId);
 }

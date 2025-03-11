@@ -85,6 +85,18 @@ public class CoffeeRestController {
         return coffeeService.recommendByCaffeineLimit(member, time);
     }
 
+    @GetMapping("/{coffeeId}")
+    @Operation(
+            summary = "카페인 농도에 따라 음료 추천 API",
+            description = """
+               사용자가 원하는 시간에 잘 수 있게 하는 카페인의 양을 가진 카페 음료를 추천해주는 API입니다.
+                - 요청 본문에는 userTimeInput, 즉 사용자가 자고싶은 시간이 포함되어야 합니다.
+                """
+    )
+    public ResponseEntity<ApiResponse<CoffeeDto.CoffeeResponseDto>> findCoffee(@PathVariable Long coffeeId) {
+        return coffeeService.getCoffeeInfo(coffeeId);
+    }
+
     @GetMapping("/popular")
     @Operation(
             summary = "인기메뉴 추천 API",
@@ -103,13 +115,13 @@ public class CoffeeRestController {
              브랜드명이나 음료 이름으로 검색하는 API입니다. ex.스타벅스 , 아메리카노
                 """
     )
-    public ApiResponse<CoffeeDto.CoffeeListResponseDto> searchByKeyword(@RequestParam("keyword") String keyword,
+    public ResponseEntity<ApiResponse<CoffeeDto.CoffeeListResponseDto>> searchByKeyword(@RequestParam("keyword") String keyword,
                                                                         @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") Integer page) {
 
         Pageable pageable = PageRequest.of(page, 6);
 
         Page<Coffee> coffeePage = coffeeService.searchByKeyword(keyword, pageable);
-        return ApiResponse.onSuccess(CoffeeConverter.toCoffeeListDto(coffeePage));
+        return ResponseEntity.ok(ApiResponse.onSuccess(CoffeeConverter.toCoffeeListDto(coffeePage)));
     }
 
     @GetMapping("/recommended/recent5")
@@ -122,7 +134,7 @@ public class CoffeeRestController {
     public ResponseEntity<ApiResponse<List<CoffeeDto.CoffeePreviewDTO>>> get5RecentRecommendedCoffees() {
         String email = extractMemberEmail();
         Long id = memberService.getMemberIdByEmail(email);
-        return coffeeService.get5RecentRecommendedCoffees(id);
+        return ResponseEntity.ok(ApiResponse.onSuccess(coffeeService.get5RecentRecommendedCoffees(id)));
     }
 
     @GetMapping("recommended/all")

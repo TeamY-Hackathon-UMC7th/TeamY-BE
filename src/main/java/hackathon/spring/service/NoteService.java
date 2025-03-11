@@ -34,6 +34,7 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final MemberRepository memberRepository;
     private final CoffeeRepository coffeeRepository;
+    private final MemberService memberService;
 
     @Transactional
     public Note createNote(NoteDto.NewNoteDTO dto, Long memberId) {
@@ -81,14 +82,15 @@ public class NoteService {
 
     @Transactional(readOnly = true)
     public NoteDto.GetAllNotesDTO getAllNotes(Long memberId, int page, int size) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_REGISTERED_USER));
+
         Pageable pageable = (Pageable) PageRequest.of(page, size);
         Page<Note> notesPage = noteRepository.findByMemberId(memberId, pageable);
 
         List<Note> notes = noteRepository.findByMemberId(memberId);
         //노트 없으면 없는 거 보여주기
-//        if (notes.isEmpty()) {
-//            throw new NoteHandler(ErrorStatus._NOTE_NOT_FOUND);
-//        }
+
         List<NoteDto.NotePreviewDTO> notePreviews = notes.stream()
                 .map(note -> new NoteDto.NotePreviewDTO(
                         note.getId(),

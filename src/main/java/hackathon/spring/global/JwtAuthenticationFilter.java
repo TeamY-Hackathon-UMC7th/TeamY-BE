@@ -70,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(
                 new ObjectMapper().writeValueAsString(
-                        ApiResponse.onFailure("AUTH4001", message, null)
+                        ApiResponse.onFailure("_NOT_LOGIN_USER", message, null)
                 )
         );
     }
