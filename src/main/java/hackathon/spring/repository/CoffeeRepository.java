@@ -20,12 +20,17 @@ public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
 //    List<Coffee> findAllByBrand(Brand brand);
     List<Coffee> findTop5ByOrderByDrinkCountDesc();
 
-    @Query("SELECT c FROM Coffee c WHERE "
+    @Query(value = "SELECT * FROM coffee c WHERE "
             + "c.name LIKE %:keyword% OR "
-            + "CAST(c.brand AS string) LIKE %:keyword% OR "
-            + "REPLACE(CONCAT(CAST(c.brand AS string), ' ', c.name), ' ', '') "
-            + "LIKE REPLACE(CONCAT('%', :keyword, '%'), ' ', '')")
-    Page<Coffee> findByBrandOrNameContaining(@Param("keyword") String keyword, Pageable pageable);
+            + "CAST(c.brand AS CHAR) LIKE %:keyword% OR " // ✅ string → CHAR 변경
+            + "(REPLACE(CONCAT(CAST(c.brand AS CHAR), ' ', c.name), ' ', '') LIKE %:keyword%) "
+            + "OR (CONCAT(c.brand, ' ', c.name) REGEXP :regexPattern)",
+            nativeQuery = true) // ✅ MySQL 네이티브 쿼리로 변경
+    Page<Coffee> findByBrandOrNameContaining(
+            @Param("keyword") String keyword,
+            @Param("regexPattern") String regexPattern,
+            Pageable pageable);
+
 
     // 커피의 drinkCount를 1 증가시키는 메서드 (커피 id를 사용)
     @Modifying

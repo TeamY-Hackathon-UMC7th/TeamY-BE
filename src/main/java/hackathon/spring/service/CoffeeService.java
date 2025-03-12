@@ -35,6 +35,7 @@ import java.util.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -160,17 +161,12 @@ public class CoffeeService {
 
 
     public Page<Coffee> searchByKeyword(String keyword, Pageable pageable) {
-        Page<Coffee> coffees = coffeeRepository.findByBrandOrNameContaining(keyword, pageable);
+        // 정규식 패턴: 공백을 기준으로 단어를 나누고, 모든 단어가 포함되도록 설정
+        String regexPattern = Arrays.stream(keyword.split("\\s+"))
+                .map(Pattern::quote) // SQL Injection 방지
+                .collect(Collectors.joining(".*")); // 단어 사이에 '.*' 추가
 
-        if (coffees == null || coffees.isEmpty()) {
-            throw new GeneralException(ErrorStatus._COFFEE_NOT_FOUND);
-        }
-
-//        List<CoffeeDto.CoffeeResponseDto> coffeeResponseDtos = coffees.stream()
-//                .map(coffeeConverter::toCoffeeDto)
-//                .collect(Collectors.toList());
-
-        return coffees;
+        return coffeeRepository.findByBrandOrNameContaining(keyword, regexPattern, pageable);
     }
 
     public List<CoffeeDto.CoffeePreviewDTO> get5RecentRecommendedCoffees(Long memberId) {

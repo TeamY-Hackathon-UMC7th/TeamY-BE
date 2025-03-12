@@ -92,11 +92,13 @@ public class CoffeeDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CoffeeListResponseDto {
-        private List<CoffeeResponseDto> coffeeResponseDtos;
-//        private Integer listSize;
-//        private Integer totalPage;
-//        private Long totalElements;
-//        private Boolean isFirst;
-//        private Boolean isLast;
+        private List<CoffeeResponseDto> coffeeResponseDtos; // 현재 페이지의 데이터
+        private Integer currentPage;  // 현재 페이지 번호
+        private Integer totalPages;   // 전체 페이지 수
+        private Long totalElements;   // 전체 데이터 개수
+        private Boolean isFirst;      // 첫 페이지 여부
+        private Boolean isLast;       // 마지막 페이지 여부
+        private Integer pageSize;     // 페이지당 개수
     }
+
 }

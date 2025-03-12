@@ -88,10 +88,10 @@ public class NoteService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_REGISTERED_USER));
 
-        Pageable pageable = (Pageable) PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<Note> notesPage = noteRepository.findByMemberId(memberId, pageable);
 
-        List<Note> notes = noteRepository.findByMemberId(memberId);
+        List<Note> notes = notesPage.getContent();
         //노트 없으면 없는 거 보여주기
 
         List<NoteDto.NotePreviewDTO> notePreviews = notes.stream()

@@ -26,16 +26,17 @@ public class CoffeeConverter {
                 .build();
     }
 
-    public static CoffeeDto.CoffeeListResponseDto toCoffeeListDto(Page<Coffee> coffees) {
-        List<CoffeeDto.CoffeeResponseDto> coffeeDtos = coffees.stream().map(CoffeeConverter::toCoffeeDto).toList();
+    public static CoffeeDto.CoffeeListResponseDto toCoffeeListDto(Page<Coffee> coffeePage) {
+        List<CoffeeDto.CoffeeResponseDto> coffeeDtos = coffeePage.stream().map(CoffeeConverter::toCoffeeDto).toList();
 
         return CoffeeDto.CoffeeListResponseDto.builder()
                 .coffeeResponseDtos(coffeeDtos)
-//                .isFirst(coffees.isFirst())
-//                .isLast(coffees.isLast())
-//                .listSize(coffeeDtos.size())
-//                .totalElements(coffees.getTotalElements())
-//                .totalPage(coffees.getTotalPages())
+                .currentPage(coffeePage.getNumber())  // 현재 페이지
+                .totalPages(coffeePage.getTotalPages())  // 전체 페이지 수
+                .totalElements(coffeePage.getTotalElements())  // 전체 데이터 개수
+                .isFirst(coffeePage.isFirst())  // 첫 페이지 여부
+                .isLast(coffeePage.isLast())  // 마지막 페이지 여부
+                .pageSize(coffeePage.getSize())  // 한 페이지당 개수
                 .build();
     }
 
