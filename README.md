@@ -1,4 +1,6 @@
-<div align=center>
+> <img src="https://github.com/user-attachments/assets/93290c76-791d-4055-be14-009abdd53e83" width="150"><br/>
+> UMC 7기 해커톤 대상작
+> <div align=center>
 
 # ☕ LastCoffee_Backend ☕
 
